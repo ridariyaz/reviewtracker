@@ -1,11 +1,20 @@
 from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
 import qrcode
+import os
 
 app = Flask(__name__)
 
 conn = sqlite3.connect("database.db")
 cur = conn.cursor()
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS employees (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+name TEXT NOT NULL,
+scans INTEGER NOT NULL DEFAULT 0
+)
+""")
 
 cur.execute("""
 CREATE TABLE IF NOT EXISTS feedback (
@@ -54,6 +63,7 @@ def add_employee():
     # generate QR code pointing to the hosted review URL
     url = url_for("review", employee_id=employee_id, _external=True)
 
+    os.makedirs("static/qrcodes", exist_ok=True)
     img = qrcode.make(url)
     img.save(f"static/qrcodes/{employee_id}.png")
 
