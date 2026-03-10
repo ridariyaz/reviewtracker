@@ -1,9 +1,14 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
 import qrcode
 import os
+from functools import wraps
 
 app = Flask(__name__)
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-me-in-production")
+
+ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "password123")
 
 conn = sqlite3.connect("database.db")
 cur = conn.cursor()
@@ -28,13 +33,46 @@ comment TEXT
 conn.commit()
 conn.close()
 
+def login_required(view_func):
+    @wraps(view_func)
+    def wrapped_view(*args, **kwargs):
+        if not session.get("admin_logged_in"):
+            return redirect(url_for("login"))
+        return view_func(*args, **kwargs)
+
+    return wrapped_view
+
+
 @app.route("/")
 def home():
-    # Redirect root URL to the admin dashboard so the main link shows the UI
-    return redirect("/admin")
+    if session.get("admin_logged_in"):
+        return redirect(url_for("admin"))
+    return redirect(url_for("login"))
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    error = None
+    if request.method == "POST":
+        username = request.form.get("username", "")
+        password = request.form.get("password", "")
+
+        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
+            session["admin_logged_in"] = True
+            return redirect(url_for("admin"))
+        error = "Invalid credentials. Please try again."
+
+    return render_template("login.html", error=error)
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
 
 
 @app.route("/admin")
+@login_required
 def admin():
 
     conn = sqlite3.connect("database.db")
@@ -57,6 +95,7 @@ def admin():
     return render_template("admin.html", employees=employees)
 
 @app.route("/add_employee", methods=["POST"])
+@login_required
 def add_employee():
 
     name = request.form["name"]
@@ -77,7 +116,35 @@ def add_employee():
     img = qrcode.make(url)
     img.save(f"static/qrcodes/{employee_id}.png")
 
-    return redirect("/admin")
+    return redirect(url_for("admin"))
+
+
+@app.route("/edit_employee/<int:employee_id>", methods=["POST"])
+@login_required
+def edit_employee(employee_id):
+    new_name = request.form.get("name", "").strip()
+    if new_name:
+        conn = sqlite3.connect("database.db")
+        cur = conn.cursor()
+        cur.execute("UPDATE employees SET name = ? WHERE id = ?", (new_name, employee_id))
+        conn.commit()
+        conn.close()
+    return redirect(url_for("admin"))
+
+
+@app.route("/delete_employee/<int:employee_id>", methods=["POST"])
+@login_required
+def delete_employee(employee_id):
+    conn = sqlite3.connect("database.db")
+    cur = conn.cursor()
+
+    # Delete associated feedback first to keep integrity simple
+    cur.execute("DELETE FROM feedback WHERE employee_id = ?", (employee_id,))
+    cur.execute("DELETE FROM employees WHERE id = ?", (employee_id,))
+
+    conn.commit()
+    conn.close()
+    return redirect(url_for("admin"))
 
 @app.route("/review/<employee_id>")
 def review(employee_id):
@@ -134,6 +201,7 @@ def submit_internal_feedback():
     return redirect("/thankyou")
 
 @app.route("/feedback")
+@login_required
 def feedback():
 
     conn = sqlite3.connect("database.db")
