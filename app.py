@@ -40,6 +40,15 @@ def admin():
     conn = sqlite3.connect("database.db")
     cur = conn.cursor()
 
+    # Ensure the employees table exists (safety for fresh deployments)
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS employees (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    scans INTEGER NOT NULL DEFAULT 0
+    )
+    """)
+
     cur.execute("SELECT * FROM employees")
     employees = cur.fetchall()
 
@@ -129,6 +138,15 @@ def feedback():
 
     conn = sqlite3.connect("database.db")
     cur = conn.cursor()
+
+    # Ensure the employees table exists before joining
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS employees (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    scans INTEGER NOT NULL DEFAULT 0
+    )
+    """)
 
     cur.execute("""
     SELECT employees.name, feedback.rating, feedback.comment
