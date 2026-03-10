@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+body{
+font-family: Arial;
+text-align:center;
+padding-top:80px;
+background:#f5f5f5;
+}
+
+h1{
+font-size:40px;
+}
+
+button{
+width:70%;
+padding:20px;
+margin:20px;
+font-size:28px;
+border-radius:12px;
+border:none;
+}
+
+.good{
+background:#4CAF50;
+color:white;
+}
+
+.ok{
+background:#FFC107;
+}
+
+.bad{
+background:#F44336;
+color:white;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>How was your service?</h1>
+
+<a href="/good/{{ employee_id }}">
+<button class="good">😊 Good</button>
+</a>
+
+<br>
+
+<a href="/ok/{{ employee_id }}">
+<button class="ok">😐 OK</button>
+</a>
+
+<br>
+
+<a href="/bad/{{ employee_id }}">
+<button class="bad">😞 Bad</button>
+</a>
+
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+body{
+font-family:Arial;
+text-align:center;
+padding-top:60px;
+}
+
+textarea{
+width:80%;
+height:120px;
+font-size:18px;
+}
+
+button{
+margin-top:20px;
+padding:15px;
+font-size:20px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Tell us what went wrong</h1>
+
+<form action="/submit_internal_feedback" method="POST">
+
+<input type="hidden" name="employee_id" value="{{ employee_id }}">
+<input type="hidden" name="rating" value="{{ rating }}">
+
+<textarea name="comment" placeholder="Your feedback helps us 
+improve"></textarea>
+
+<br>
+
+<button type="submit">Submit Feedback</button>
+
+</form>
+
+</body>
+
+</html>

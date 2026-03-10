@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+body{
+font-family:Arial;
+padding:40px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th, td{
+border:1px solid #ddd;
+padding:12px;
+}
+
+th{
+background:#f2f2f2;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Customer Feedback</h1>
+
+<table>
+
+<tr>
+<th>Employee</th>
+<th>Rating</th>
+<th>Comment</th>
+</tr>
+
+{% for f in feedback %}
+
+<tr>
+<td>{{ f[0] }}</td>
+<td>{{ f[1] }}</td>
+<td>{{ f[2] }}</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+</body>
+
+</html>
