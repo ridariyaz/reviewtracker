@@ -3,15 +3,24 @@ import sqlite3
 import qrcode
 import os
 from functools import wraps
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-me-in-production")
 
-ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "password123")
-
 conn = sqlite3.connect("database.db")
 cur = conn.cursor()
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS users (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+email TEXT,
+username TEXT UNIQUE,
+password_hash TEXT,
+is_admin INTEGER NOT NULL DEFAULT 1,
+provider TEXT DEFAULT 'local'
+)
+""")
 
 cur.execute("""
 CREATE TABLE IF NOT EXISTS employees (
@@ -54,15 +63,56 @@ def home():
 def login():
     error = None
     if request.method == "POST":
-        username = request.form.get("username", "")
-        password = request.form.get("password", "")
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "").strip()
 
-        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
-            session["admin_logged_in"] = True
+        conn = sqlite3.connect("database.db")
+        cur = conn.cursor()
+        cur.execute("SELECT id, username, password_hash, is_admin FROM users WHERE username = ?", (username,))
+        row = cur.fetchone()
+        conn.close()
+
+        if row and row[2] and check_password_hash(row[2], password):
+            session["admin_logged_in"] = bool(row[3])
+            session["user_id"] = row[0]
+            session["username"] = row[1]
             return redirect(url_for("admin"))
+
         error = "Invalid credentials. Please try again."
 
     return render_template("login.html", error=error)
+
+
+@app.route("/signup", methods=["GET", "POST"])
+def signup():
+    error = None
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "").strip()
+
+        if not username or not password:
+            error = "Username and password are required."
+        else:
+            conn = sqlite3.connect("database.db")
+            cur = conn.cursor()
+            cur.execute("SELECT id FROM users WHERE username = ?", (username,))
+            existing = cur.fetchone()
+
+            if existing:
+                error = "That username is already taken."
+            else:
+                password_hash = generate_password_hash(password)
+                cur.execute(
+                    "INSERT INTO users (username, password_hash, is_admin, provider) VALUES (?, ?, ?, ?)",
+                    (username, password_hash, 1, "local"),
+                )
+                conn.commit()
+                conn.close()
+                return redirect(url_for("login"))
+
+            conn.close()
+
+    return render_template("signup.html", error=error)
 
 
 @app.route("/logout")
