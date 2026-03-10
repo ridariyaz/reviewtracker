@@ -30,7 +30,8 @@ conn.close()
 
 @app.route("/")
 def home():
-    return "Review system running"
+    # Redirect root URL to the admin dashboard so the main link shows the UI
+    return redirect("/admin")
 
 
 @app.route("/admin")
