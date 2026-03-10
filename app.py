@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
 import qrcode
 
@@ -51,8 +51,8 @@ def add_employee():
     conn.commit()
     conn.close()
 
-    # generate QR code
-    url = f"http://192.168.0.100:5000/review/{employee_id}"
+    # generate QR code pointing to the hosted review URL
+    url = url_for("review", employee_id=employee_id, _external=True)
 
     img = qrcode.make(url)
     img.save(f"static/qrcodes/{employee_id}.png")
@@ -133,5 +133,6 @@ def feedback():
 @app.route("/thankyou")
 def thankyou():
     return render_template("thankyou.html")
-app.run(host="0.0.0.0", port=5000, debug=True)
 
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
