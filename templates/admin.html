@@ -399,10 +399,20 @@
                 <details class="actions">
                   <summary>⋯</summary>
                   <div class="actions-menu">
+                    <!-- Rename -->
                     <form class="action-inline-form" action="/edit_employee/{{ employee[0] }}" method="POST">
                       <input class="action-input" type="text" name="name" placeholder="Rename…" />
                       <button class="btn-ghost" type="submit">Save</button>
                     </form>
+
+                    <!-- Set employee login credentials -->
+                    <form class="action-inline-form" action="/employee/{{ employee[0] }}/credentials" method="POST" style="margin-top:6px;">
+                      <input class="action-input" type="text" name="employee_username" placeholder="Login username…" />
+                      <input class="action-input" type="password" name="employee_password" placeholder="Login password…" />
+                      <button class="btn-ghost" type="submit">Set login</button>
+                    </form>
+
+                    <!-- Delete -->
                     <form style="display:block; margin-top:6px;" action="/delete_employee/{{ employee[0] }}" method="POST" onsubmit="return confirm('Remove this employee and their feedback?');">
                       <button class="btn-ghost btn-danger" type="submit">Delete</button>
                     </form>

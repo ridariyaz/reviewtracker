@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin Login · ReviewTracker</title>
+  <title>Employee Login · {{ brand_name or 'ReviewTracker' }}</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -25,30 +25,6 @@
       box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
       border: 1px solid rgba(148, 163, 184, 0.4);
       backdrop-filter: blur(16px);
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 18px;
-    }
-    .brand-badge {
-      width: 32px;
-      height: 32px;
-      border-radius: 999px;
-      background: radial-gradient(circle at 30% 0, #38bdf8, #6366f1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 16px;
-      color: #e5e7eb;
-    }
-    .brand-title { font-weight: 600; }
-    .brand-subtitle {
-      font-size: 12px;
-      color: #9ca3af;
-      margin-top: 2px;
     }
     h1 {
       font-size: 22px;
@@ -111,27 +87,17 @@
       color: #60a5fa;
       text-decoration: none;
     }
-    a:hover {
-      text-decoration: underline;
-    }
+    a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
   <div class="card">
-    <div class="brand">
-      <div class="brand-badge">R</div>
-      <div>
-        <div class="brand-title">ReviewTracker</div>
-        <div class="brand-subtitle">Private admin access</div>
-      </div>
-    </div>
+    <h1>Employee login</h1>
+    <p class="subtitle">Access your QR code, stats and feedback.</p>
 
-    <h1>Sign in</h1>
-    <p class="subtitle">Log in to manage employees, QR codes and internal feedback.</p>
-
-    <form method="POST" action="/login">
+    <form method="POST" action="/employee/login">
       <div class="field">
-        <label for="username">Username</label>
+        <label for="username">Employee username</label>
         <input id="username" name="username" type="text" required>
       </div>
       <div class="field">
@@ -143,15 +109,11 @@
       <div class="error">{{ error }}</div>
       {% endif %}
 
-      <button type="submit">Continue to dashboard</button>
+      <button type="submit">Continue</button>
 
       <div class="hint">
-        New here?
-        <a href="/signup">Create an admin account</a><br>
-        <span style="display:block;margin-top:6px;">
-          Employee?
-          <a href="/employee/login">Log in to see your QR and stats</a>
-        </span>
+        Admin?
+        <a href="/login">Go to admin login</a>
       </div>
     </form>
   </div>

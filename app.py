@@ -33,7 +33,9 @@ name TEXT NOT NULL,
 scans INTEGER NOT NULL DEFAULT 0,
 good_count INTEGER NOT NULL DEFAULT 0,
 ok_count INTEGER NOT NULL DEFAULT 0,
-bad_count INTEGER NOT NULL DEFAULT 0
+bad_count INTEGER NOT NULL DEFAULT 0,
+employee_username TEXT UNIQUE,
+employee_password_hash TEXT
 )
 """)
 
@@ -64,6 +66,16 @@ try:
 except sqlite3.OperationalError:
     pass
 
+try:
+    cur.execute("ALTER TABLE employees ADD COLUMN employee_username TEXT UNIQUE")
+except sqlite3.OperationalError:
+    pass
+
+try:
+    cur.execute("ALTER TABLE employees ADD COLUMN employee_password_hash TEXT")
+except sqlite3.OperationalError:
+    pass
+
 # Ensure feedback has created_at and status for old databases
 try:
     cur.execute("ALTER TABLE feedback ADD COLUMN created_at TEXT DEFAULT (CURRENT_TIMESTAMP)")
@@ -84,6 +96,16 @@ def login_required(view_func):
     def wrapped_view(*args, **kwargs):
         if not session.get("admin_logged_in"):
             return redirect(url_for("login"))
+        return view_func(*args, **kwargs)
+
+    return wrapped_view
+
+
+def employee_login_required(view_func):
+    @wraps(view_func)
+    def wrapped_view(*args, **kwargs):
+        if not session.get("employee_id"):
+            return redirect(url_for("employee_login"))
         return view_func(*args, **kwargs)
 
     return wrapped_view
@@ -152,6 +174,39 @@ def signup():
     return render_template("signup.html", error=error, brand_name=BRAND_NAME, brand_tagline=BRAND_TAGLINE, brand_logo_url=BRAND_LOGO_URL)
 
 
+@app.route("/employee/login", methods=["GET", "POST"])
+def employee_login():
+    error = None
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "").strip()
+
+        conn = sqlite3.connect("database.db")
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT id, name, employee_password_hash FROM employees WHERE employee_username = ?",
+            (username,),
+        )
+        row = cur.fetchone()
+        conn.close()
+
+        if row and row[2] and check_password_hash(row[2], password):
+            session.clear()
+            session["employee_id"] = row[0]
+            session["employee_name"] = row[1]
+            return redirect(url_for("employee_dashboard"))
+
+        error = "Invalid employee credentials. Please try again."
+
+    return render_template("employee_login.html", error=error, brand_name=BRAND_NAME, brand_tagline=BRAND_TAGLINE, brand_logo_url=BRAND_LOGO_URL)
+
+
+@app.route("/employee/logout")
+def employee_logout():
+    session.clear()
+    return redirect(url_for("employee_login"))
+
+
 @app.route("/logout")
 def logout():
     session.clear()
@@ -216,6 +271,27 @@ def edit_employee(employee_id):
         cur.execute("UPDATE employees SET name = ? WHERE id = ?", (new_name, employee_id))
         conn.commit()
         conn.close()
+    return redirect(url_for("admin"))
+
+
+@app.route("/employee/<int:employee_id>/credentials", methods=["POST"])
+@login_required
+def update_employee_credentials(employee_id):
+    username = request.form.get("employee_username", "").strip()
+    password = request.form.get("employee_password", "").strip()
+
+    conn = sqlite3.connect("database.db")
+    cur = conn.cursor()
+
+    if username and password:
+        pw_hash = generate_password_hash(password)
+        cur.execute(
+            "UPDATE employees SET employee_username = ?, employee_password_hash = ? WHERE id = ?",
+            (username, pw_hash, employee_id),
+        )
+        conn.commit()
+
+    conn.close()
     return redirect(url_for("admin"))
 
 
@@ -407,6 +483,46 @@ def export_feedback_csv():
         csv_data,
         mimetype="text/csv",
         headers={"Content-Disposition": "attachment; filename=feedback.csv"},
+    )
+
+
+@app.route("/employee/dashboard")
+@employee_login_required
+def employee_dashboard():
+    employee_id = session.get("employee_id")
+    conn = sqlite3.connect("database.db")
+    cur = conn.cursor()
+
+    cur.execute(
+        "SELECT id, name, scans, good_count, ok_count, bad_count FROM employees WHERE id = ?",
+        (employee_id,),
+    )
+    employee = cur.fetchone()
+
+    cur.execute(
+        "SELECT id, name, scans, good_count, ok_count, bad_count "
+        "FROM employees ORDER BY scans DESC, name ASC"
+    )
+    leaderboard = cur.fetchall()
+
+    cur.execute(
+        "SELECT rating, comment, status, created_at "
+        "FROM feedback WHERE employee_id = ? "
+        "ORDER BY datetime(created_at) DESC, id DESC",
+        (employee_id,),
+    )
+    feedback_rows = cur.fetchall()
+
+    conn.close()
+
+    return render_template(
+        "employee_dashboard.html",
+        employee=employee,
+        leaderboard=leaderboard,
+        feedback_rows=feedback_rows,
+        brand_name=BRAND_NAME,
+        brand_tagline=BRAND_TAGLINE,
+        brand_logo_url=BRAND_LOGO_URL,
     )
 
 

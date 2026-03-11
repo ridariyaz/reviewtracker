@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Performance · {{ brand_name or 'ReviewTracker' }}</title>
+  <style>
+    :root {
+      --primary: #0d6efd;
+      --bg: #f3f5fb;
+      --card-bg: #ffffff;
+      --border-soft: #e2e6f0;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+    }
+    .topbar {
+      background: #020617;
+      color: #e5e7eb;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 1px 4px rgba(15, 23, 42, 0.4);
+    }
+    .page {
+      max-width: 1120px;
+      margin: 24px auto 40px;
+      padding: 0 16px;
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 18px 20px 20px;
+      box-shadow: 0 14px 32px rgba(15, 23, 42, 0.16);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      margin-bottom: 18px;
+    }
+    .muted {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+    }
+    th {
+      background: #f9fafb;
+      font-weight: 500;
+      color: #4b5563;
+    }
+    tr:last-child td { border-bottom: none; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div>Employee dashboard</div>
+    <div>
+      {{ employee[1] if employee else '' }}
+      · <a href="/employee/logout" style="color:#e5e7eb;text-decoration:none;">Logout</a>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="card">
+      <h2>Your QR code</h2>
+      {% if employee %}
+      <p class="muted">Show this QR to customers to capture feedback.</p>
+      <img src="/static/qrcodes/{{ employee[0] }}.png" width="160" alt="Your QR code">
+      {% else %}
+      <p class="muted">Employee not found.</p>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2>Your performance</h2>
+      {% if employee %}
+      <p>Total scans: {{ employee[2] }}</p>
+      <p>Good: {{ employee[3] }} · OK: {{ employee[4] }} · Bad: {{ employee[5] }}</p>
+      {% else %}
+      <p class="muted">No data yet.</p>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2>Your feedback</h2>
+      <table>
+        <tr>
+          <th>Rating</th>
+          <th>Comment</th>
+          <th>Status</th>
+          <th>When</th>
+        </tr>
+        {% for f in feedback_rows %}
+        <tr>
+          <td>{{ f[0] }}</td>
+          <td>{{ f[1] }}</td>
+          <td>{{ f[2] }}</td>
+          <td class="muted">{{ f[3] }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% if not feedback_rows %}
+      <p class="muted" style="margin-top:10px;">No feedback yet.</p>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2>Team leaderboard</h2>
+      <table>
+        <tr>
+          <th>#</th>
+          <th>Employee</th>
+          <th>Total scans</th>
+          <th>Good</th>
+          <th>OK</th>
+          <th>Bad</th>
+        </tr>
+        {% for e in leaderboard %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ e[1] }}</td>
+          <td>{{ e[2] }}</td>
+          <td>{{ e[3] }}</td>
+          <td>{{ e[4] }}</td>
+          <td>{{ e[5] }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% if not leaderboard %}
+      <p class="muted" style="margin-top:10px;">No employees yet.</p>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>
