@@ -263,6 +263,36 @@
       text-decoration: none;
     }
     .small-link:hover { text-decoration: underline; }
+    details.actions {
+      position: relative;
+      display: inline-block;
+    }
+    details.actions summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      font-size: 16px;
+    }
+    details.actions[open] summary {
+      background: #e5e7eb;
+    }
+    details.actions summary::-webkit-details-marker {
+      display: none;
+    }
+    .actions-menu {
+      position: absolute;
+      right: 0;
+      margin-top: 6px;
+      padding: 8px;
+      border-radius: 10px;
+      background: #ffffff;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+      border: 1px solid #e5e7eb;
+      z-index: 10;
+    }
   </style>
 </head>
 <body>
@@ -270,13 +300,14 @@
     <div class="brand">
       <div class="brand-badge">R</div>
       <div>
-        <div>ReviewTracker</div>
-        <div class="brand-sub">Employee QR review funnel</div>
+        <div>{{ brand_name or 'ReviewTracker' }}</div>
+        <div class="brand-sub">{{ brand_tagline or 'Employee QR review funnel' }}</div>
       </div>
     </div>
     <div class="top-nav">
       <a class="nav-link" href="/admin">Dashboard</a>
       <a class="nav-link" href="/feedback">Feedback</a>
+      <a class="nav-link" href="/analytics">Analytics</a>
       <a class="nav-link btn-outline" href="/logout">Logout</a>
     </div>
   </div>
@@ -365,13 +396,18 @@
                 <div><a class="small-link" href="/review/{{ employee[0] }}" target="_blank">Preview customer screen</a></div>
               </td>
               <td class="text-right">
-                <form class="action-inline-form" action="/edit_employee/{{ employee[0] }}" method="POST">
-                  <input class="action-input" type="text" name="name" placeholder="Rename…" />
-                  <button class="btn-ghost" type="submit">Save</button>
-                </form>
-                <form style="display:inline;" action="/delete_employee/{{ employee[0] }}" method="POST" onsubmit="return confirm('Remove this employee and their feedback?');">
-                  <button class="btn-ghost btn-danger" type="submit">Delete</button>
-                </form>
+                <details class="actions">
+                  <summary>⋯</summary>
+                  <div class="actions-menu">
+                    <form class="action-inline-form" action="/edit_employee/{{ employee[0] }}" method="POST">
+                      <input class="action-input" type="text" name="name" placeholder="Rename…" />
+                      <button class="btn-ghost" type="submit">Save</button>
+                    </form>
+                    <form style="display:block; margin-top:6px;" action="/delete_employee/{{ employee[0] }}" method="POST" onsubmit="return confirm('Remove this employee and their feedback?');">
+                      <button class="btn-ghost btn-danger" type="submit">Delete</button>
+                    </form>
+                  </div>
+                </details>
               </td>
             </tr>
             {% endfor %}

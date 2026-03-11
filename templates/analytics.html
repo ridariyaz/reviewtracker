@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Internal Feedback · {{ brand_name or 'ReviewTracker' }}</title>
+  <title>Analytics · {{ brand_name or 'ReviewTracker' }}</title>
   <style>
     :root {
       --primary: #0d6efd;
@@ -80,10 +80,6 @@
       padding: 0 16px;
     }
     .page-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
       margin-bottom: 20px;
     }
     .page-title {
@@ -95,6 +91,15 @@
       font-size: 14px;
       color: var(--text-muted);
     }
+    .layout {
+      display: grid;
+      gap: 20px;
+    }
+    @media (min-width: 900px) {
+      .layout {
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.6fr);
+      }
+    }
     .card {
       background: var(--card-bg);
       border-radius: 14px;
@@ -102,46 +107,35 @@
       box-shadow: 0 14px 32px rgba(15, 23, 42, 0.16);
       border: 1px solid rgba(148, 163, 184, 0.25);
     }
-    .table-wrapper {
-      margin-top: 8px;
-      border-radius: 12px;
-      border: 1px solid var(--border-soft);
-      overflow: hidden;
+    .card-header {
+      margin-bottom: 10px;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .card-kicker {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 14px;
+      font-size: 13px;
     }
     th, td {
-      padding: 10px 12px;
+      padding: 8px 10px;
       border-bottom: 1px solid #e5e7eb;
-      vertical-align: top;
+      text-align: left;
     }
     th {
       background: #f9fafb;
       font-weight: 500;
       color: #4b5563;
-      text-align: left;
     }
     tr:last-child td { border-bottom: none; }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 3px 8px;
-      border-radius: 999px;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-    .badge-ok {
-      background: #fef3c7;
-      color: #92400e;
-    }
-    .badge-bad {
-      background: #fee2e2;
-      color: #b91c1c;
-    }
     .muted {
       color: var(--text-muted);
       font-size: 13px;
@@ -154,78 +148,81 @@
       <div class="brand-badge">R</div>
       <div>
         <div>{{ brand_name or 'ReviewTracker' }}</div>
-        <div class="brand-sub">Internal feedback inbox</div>
+        <div class="brand-sub">{{ brand_tagline or 'Employee QR review funnel' }}</div>
       </div>
     </div>
     <div class="top-nav">
       <a class="nav-link" href="/admin">Dashboard</a>
       <a class="nav-link" href="/feedback">Feedback</a>
+      <a class="nav-link" href="/analytics">Analytics</a>
       <a class="nav-link btn-outline" href="/logout">Logout</a>
     </div>
   </div>
 
   <div class="page">
     <div class="page-header">
-      <div>
-        <div class="page-title">Internal feedback</div>
-        <div class="page-subtitle">
-          Low and medium scores are captured here instead of going to Google. Use this list to follow up.
-        </div>
+      <div class="page-title">Analytics</div>
+      <div class="page-subtitle">
+        See how many customers are scanning, how they rate you over time, and who is generating the most feedback.
       </div>
     </div>
 
-    <div class="card">
-      <div class="table-wrapper">
+    <div class="layout">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-kicker">Timeline</div>
+          <div class="card-title">Scans and ratings per day</div>
+        </div>
         <table>
           <tr>
-            <th>Employee</th>
-            <th>Rating</th>
-            <th>Comment</th>
-            <th>Status</th>
-            <th>Received</th>
+            <th>Date</th>
+            <th>Total</th>
+            <th>Good</th>
+            <th>OK</th>
+            <th>Bad</th>
           </tr>
-          {% for f in feedback %}
+          {% for row in daily_stats %}
           <tr>
-            <td>
-              <div>{{ f[1] }}</div>
-            </td>
-            <td>
-              {% if f[2] == "bad" %}
-                <span class="badge badge-bad">Bad</span>
-              {% elif f[2] == "ok" %}
-                <span class="badge badge-ok">OK</span>
-              {% else %}
-                <span class="muted">{{ f[2] }}</span>
-              {% endif %}
-            </td>
-            <td>
-              <div>{{ f[3] }}</div>
-            </td>
-            <td>
-              <form action="/feedback/{{ f[0] }}/status" method="POST">
-                {% if f[4] == "resolved" %}
-                  <input type="hidden" name="status" value="new">
-                  <button type="submit" style="border:none;background:none;padding:0;cursor:pointer;">
-                    <span class="muted">Resolved</span>
-                  </button>
-                {% else %}
-                  <input type="hidden" name="status" value="resolved">
-                  <button type="submit" style="border:none;background:none;padding:0;cursor:pointer;">
-                    <span class="badge badge-ok">Mark resolved</span>
-                  </button>
-                {% endif %}
-              </form>
-            </td>
-            <td>
-              <div class="muted">{{ f[5] }}</div>
-            </td>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+            <td>{{ row[2] or 0 }}</td>
+            <td>{{ row[3] or 0 }}</td>
+            <td>{{ row[4] or 0 }}</td>
           </tr>
           {% endfor %}
         </table>
+        {% if not daily_stats %}
+        <p class="muted" style="margin-top:10px;">No feedback yet. Once you scan a QR and submit, numbers will appear here.</p>
+        {% endif %}
       </div>
-      {% if not feedback %}
-      <p class="muted" style="margin-top: 10px;">No internal feedback yet. Once customers choose “OK” or “Bad”, their comments will show up here.</p>
-      {% endif %}
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-kicker">Last 30 days</div>
+          <div class="card-title">Per-employee performance</div>
+        </div>
+        <table>
+          <tr>
+            <th>Employee</th>
+            <th>Good</th>
+            <th>OK</th>
+            <th>Bad</th>
+            <th>Total</th>
+          </tr>
+          {% for e in per_employee_30d %}
+          <tr>
+            <td>{{ e[1] }}</td>
+            <td>{{ e[2] }}</td>
+            <td>{{ e[3] }}</td>
+            <td>{{ e[4] }}</td>
+            <td>{{ e[2] + e[3] + e[4] }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+        {% if not per_employee_30d %}
+        <p class="muted" style="margin-top:10px;">No employees or feedback yet.</p>
+        {% endif %}
+      </div>
     </div>
   </div>
 </body>
