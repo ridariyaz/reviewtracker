@@ -107,18 +107,12 @@
       color: #6b7280;
       text-align: center;
     }
-    .badge-creds {
-      display: inline-flex;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px dashed rgba(148, 163, 184, 0.6);
-      background: rgba(15, 23, 42, 0.8);
-      margin-top: 6px;
+    a {
+      color: #60a5fa;
+      text-decoration: none;
     }
-    .badge-creds span {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 11px;
+    a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
@@ -152,11 +146,8 @@
       <button type="submit">Continue to dashboard</button>
 
       <div class="hint">
-        Default demo credentials:
-        <div class="badge-creds">
-          <span>user: admin</span>
-          <span>pass: password123</span>
-        </div>
+        New here?
+        <a href="/signup">Create an account</a>
       </div>
     </form>
   </div>
