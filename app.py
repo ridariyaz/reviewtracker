@@ -4,6 +4,7 @@ import qrcode
 import os
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-me-in-production")
@@ -754,36 +755,78 @@ def analytics():
     company = get_current_company(session.get("user_id"))
     company_id = company["id"] if company else 1
 
+    # Date range handling
+    range_key = request.args.get("range", "30d")
+    range_map_days = {
+        "7d": 7,
+        "30d": 30,
+        "6m": 180,
+        "1y": 365,
+    }
+    days = range_map_days.get(range_key)
+    start_date = None
+    if days is not None:
+        start_date = (datetime.utcnow() - timedelta(days=days)).date().isoformat()
+
     # Daily breakdown
-    cur.execute("""
-    SELECT DATE(created_at) as day,
-           COUNT(*) as total,
-           SUM(CASE WHEN rating = 'good' THEN 1 ELSE 0 END) as good_count,
-           SUM(CASE WHEN rating = 'ok' THEN 1 ELSE 0 END) as ok_count,
-           SUM(CASE WHEN rating = 'bad' THEN 1 ELSE 0 END) as bad_count
-    FROM feedback
-    WHERE company_id = ?
-    GROUP BY day
-    ORDER BY day DESC
-    """, (company_id,))
+    if start_date:
+        cur.execute("""
+        SELECT DATE(created_at) as day,
+               COUNT(*) as total,
+               SUM(CASE WHEN rating = 'good' THEN 1 ELSE 0 END) as good_count,
+               SUM(CASE WHEN rating = 'ok' THEN 1 ELSE 0 END) as ok_count,
+               SUM(CASE WHEN rating = 'bad' THEN 1 ELSE 0 END) as bad_count
+        FROM feedback
+        WHERE company_id = ? AND DATE(created_at) >= ?
+        GROUP BY day
+        ORDER BY day ASC
+        """, (company_id, start_date))
+    else:
+        cur.execute("""
+        SELECT DATE(created_at) as day,
+               COUNT(*) as total,
+               SUM(CASE WHEN rating = 'good' THEN 1 ELSE 0 END) as good_count,
+               SUM(CASE WHEN rating = 'ok' THEN 1 ELSE 0 END) as ok_count,
+               SUM(CASE WHEN rating = 'bad' THEN 1 ELSE 0 END) as bad_count
+        FROM feedback
+        WHERE company_id = ?
+        GROUP BY day
+        ORDER BY day ASC
+        """, (company_id,))
     daily_stats = cur.fetchall()
 
-    # Last 30 days per employee
-    cur.execute("""
-    SELECT e.id,
-           e.name,
-           COALESCE(SUM(CASE WHEN f.rating = 'good' THEN 1 ELSE 0 END), 0) as good_30d,
-           COALESCE(SUM(CASE WHEN f.rating = 'ok' THEN 1 ELSE 0 END), 0) as ok_30d,
-           COALESCE(SUM(CASE WHEN f.rating = 'bad' THEN 1 ELSE 0 END), 0) as bad_30d
-    FROM employees e
-    LEFT JOIN feedback f
-      ON f.employee_id = e.id
-     AND f.company_id = ?
-     AND DATE(f.created_at) >= DATE('now', '-30 day')
-    WHERE e.company_id = ?
-    GROUP BY e.id, e.name
-    ORDER BY (good_30d + ok_30d + bad_30d) DESC, e.name ASC
-    """, (company_id, company_id))
+    # Per-employee in selected range
+    if start_date:
+        cur.execute("""
+        SELECT e.id,
+               e.name,
+               COALESCE(SUM(CASE WHEN f.rating = 'good' THEN 1 ELSE 0 END), 0) as good_cnt,
+               COALESCE(SUM(CASE WHEN f.rating = 'ok' THEN 1 ELSE 0 END), 0) as ok_cnt,
+               COALESCE(SUM(CASE WHEN f.rating = 'bad' THEN 1 ELSE 0 END), 0) as bad_cnt
+        FROM employees e
+        LEFT JOIN feedback f
+          ON f.employee_id = e.id
+         AND f.company_id = ?
+         AND DATE(f.created_at) >= ?
+        WHERE e.company_id = ?
+        GROUP BY e.id, e.name
+        ORDER BY (good_cnt + ok_cnt + bad_cnt) DESC, e.name ASC
+        """, (company_id, start_date, company_id))
+    else:
+        cur.execute("""
+        SELECT e.id,
+               e.name,
+               COALESCE(SUM(CASE WHEN f.rating = 'good' THEN 1 ELSE 0 END), 0) as good_cnt,
+               COALESCE(SUM(CASE WHEN f.rating = 'ok' THEN 1 ELSE 0 END), 0) as ok_cnt,
+               COALESCE(SUM(CASE WHEN f.rating = 'bad' THEN 1 ELSE 0 END), 0) as bad_cnt
+        FROM employees e
+        LEFT JOIN feedback f
+          ON f.employee_id = e.id
+         AND f.company_id = ?
+        WHERE e.company_id = ?
+        GROUP BY e.id, e.name
+        ORDER BY (good_cnt + ok_cnt + bad_cnt) DESC, e.name ASC
+        """, (company_id, company_id))
     per_employee_30d = cur.fetchall()
 
     conn.close()
@@ -792,9 +835,10 @@ def analytics():
         "analytics.html",
         daily_stats=daily_stats,
         per_employee_30d=per_employee_30d,
-        brand_name=BRAND_NAME,
+        selected_range=range_key,
+        brand_name=company["name"] if company else BRAND_NAME,
         brand_tagline=BRAND_TAGLINE,
-        brand_logo_url=BRAND_LOGO_URL,
+        brand_logo_url=company["logo_url"] if company else BRAND_LOGO_URL,
     )
 
 @app.route("/thankyou")
