@@ -328,7 +328,10 @@
             <tr>
               <th style="width: 32px;">#</th>
               <th>Employee</th>
-              <th class="text-right">Scans</th>
+              <th class="text-right">Total scans</th>
+              <th class="text-right">Good</th>
+              <th class="text-right">OK</th>
+              <th class="text-right">Bad</th>
               <th>QR code</th>
               <th class="text-right">Actions</th>
             </tr>
@@ -345,8 +348,17 @@
               </td>
               <td class="text-right">
                 <span class="pill">
-                  {{ employee[2] }} <span style="font-size: 11px; text-transform: uppercase;">scans</span>
+                  {{ employee[2] }} <span style="font-size: 11px; text-transform: uppercase;">total</span>
                 </span>
+              </td>
+              <td class="text-right">
+                <span class="pill">{{ employee[3] }}</span>
+              </td>
+              <td class="text-right">
+                <span class="pill">{{ employee[4] }}</span>
+              </td>
+              <td class="text-right">
+                <span class="pill">{{ employee[5] }}</span>
               </td>
               <td>
                 <img class="qr-thumb" src="/static/qrcodes/{{ employee[0] }}.png" width="72" alt="QR for {{ employee[1] }}">
@@ -383,7 +395,12 @@
                 <div style="font-weight:500;">{{ employee[1] }}</div>
                 <div class="muted">ID #{{ employee[0] }}</div>
               </div>
-              <div class="pill">{{ employee[2] }} scans</div>
+              <div>
+                <div class="pill" style="margin-bottom:4px;">{{ employee[2] }} total</div>
+                <div class="muted" style="font-size:12px;">
+                  👍 {{ employee[3] }} · 😐 {{ employee[4] }} · ⚠️ {{ employee[5] }}
+                </div>
+              </div>
             </div>
           </li>
           {% endfor %}

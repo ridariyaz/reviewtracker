@@ -26,7 +26,10 @@ cur.execute("""
 CREATE TABLE IF NOT EXISTS employees (
 id INTEGER PRIMARY KEY AUTOINCREMENT,
 name TEXT NOT NULL,
-scans INTEGER NOT NULL DEFAULT 0
+scans INTEGER NOT NULL DEFAULT 0,
+good_count INTEGER NOT NULL DEFAULT 0,
+ok_count INTEGER NOT NULL DEFAULT 0,
+bad_count INTEGER NOT NULL DEFAULT 0
 )
 """)
 
@@ -39,7 +42,24 @@ comment TEXT
 )
 """)
 
+# Lightweight migration for older deployments: add per-rating columns if they are missing
+try:
+    cur.execute("ALTER TABLE employees ADD COLUMN good_count INTEGER NOT NULL DEFAULT 0")
+except sqlite3.OperationalError:
+    pass
+
+try:
+    cur.execute("ALTER TABLE employees ADD COLUMN ok_count INTEGER NOT NULL DEFAULT 0")
+except sqlite3.OperationalError:
+    pass
+
+try:
+    cur.execute("ALTER TABLE employees ADD COLUMN bad_count INTEGER NOT NULL DEFAULT 0")
+except sqlite3.OperationalError:
+    pass
+
 conn.commit()
+cur.close()
 conn.close()
 
 def login_required(view_func):
@@ -207,8 +227,14 @@ def good(employee_id):
     cur = conn.cursor()
 
     cur.execute(
-        "UPDATE employees SET scans = scans + 1 WHERE id=?",
+        "UPDATE employees SET scans = scans + 1, good_count = good_count + 1 WHERE id=?",
         (employee_id,)
+    )
+
+    # Record a "good" rating so it shows up in the per-employee matrix
+    cur.execute(
+        "INSERT INTO feedback (employee_id, rating, comment) VALUES (?, ?, ?)",
+        (employee_id, "good", ""),
     )
 
 
@@ -244,6 +270,18 @@ def submit_internal_feedback():
     cur.execute(
         "INSERT INTO feedback (employee_id, rating, comment) VALUES (?, ?, ?)", (employee_id, rating, comment)
     )
+
+    # Update total scans and per-rating counters
+    if rating == "ok":
+        cur.execute(
+            "UPDATE employees SET scans = scans + 1, ok_count = ok_count + 1 WHERE id=?",
+            (employee_id,),
+        )
+    elif rating == "bad":
+        cur.execute(
+            "UPDATE employees SET scans = scans + 1, bad_count = bad_count + 1 WHERE id=?",
+            (employee_id,),
+        )
 
     conn.commit()
     conn.close()
