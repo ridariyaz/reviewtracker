@@ -27,8 +27,22 @@ provider TEXT DEFAULT 'local'
 """)
 
 cur.execute("""
+CREATE TABLE IF NOT EXISTS companies (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+user_id INTEGER NOT NULL,
+name TEXT NOT NULL,
+logo_url TEXT,
+primary_color TEXT DEFAULT '#0d6efd',
+secondary_color TEXT DEFAULT '#111827',
+google_review_url TEXT,
+created_at TEXT DEFAULT (CURRENT_TIMESTAMP)
+)
+""")
+
+cur.execute("""
 CREATE TABLE IF NOT EXISTS employees (
 id INTEGER PRIMARY KEY AUTOINCREMENT,
+company_id INTEGER NOT NULL DEFAULT 1,
 name TEXT NOT NULL,
 scans INTEGER NOT NULL DEFAULT 0,
 good_count INTEGER NOT NULL DEFAULT 0,
@@ -42,6 +56,7 @@ employee_password_hash TEXT
 cur.execute("""
 CREATE TABLE IF NOT EXISTS feedback (
 id INTEGER PRIMARY KEY AUTOINCREMENT,
+company_id INTEGER NOT NULL DEFAULT 1,
 employee_id INTEGER,
 rating TEXT,
 comment TEXT,
@@ -50,7 +65,12 @@ status TEXT NOT NULL DEFAULT 'new'
 )
 """)
 
-# Lightweight migration for older deployments: add per-rating columns if they are missing
+# Lightweight migration for older deployments: add per-rating and company columns if they are missing
+try:
+    cur.execute("ALTER TABLE employees ADD COLUMN company_id INTEGER NOT NULL DEFAULT 1")
+except sqlite3.OperationalError:
+    pass
+
 try:
     cur.execute("ALTER TABLE employees ADD COLUMN good_count INTEGER NOT NULL DEFAULT 0")
 except sqlite3.OperationalError:
@@ -76,7 +96,11 @@ try:
 except sqlite3.OperationalError:
     pass
 
-# Ensure feedback has created_at and status for old databases
+try:
+    cur.execute("ALTER TABLE feedback ADD COLUMN company_id INTEGER NOT NULL DEFAULT 1")
+except sqlite3.OperationalError:
+    pass
+
 try:
     cur.execute("ALTER TABLE feedback ADD COLUMN created_at TEXT DEFAULT (CURRENT_TIMESTAMP)")
 except sqlite3.OperationalError:
@@ -111,6 +135,79 @@ def employee_login_required(view_func):
     return wrapped_view
 
 
+def get_companies_for_user(user_id: int | None):
+    if not user_id:
+        return []
+    conn = sqlite3.connect("database.db")
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT id, name, logo_url, primary_color, secondary_color, google_review_url "
+        "FROM companies WHERE user_id = ? ORDER BY id",
+        (user_id,),
+    )
+    rows = cur.fetchall()
+    conn.close()
+    return [
+        {
+            "id": r[0],
+            "name": r[1],
+            "logo_url": r[2],
+            "primary_color": r[3],
+            "secondary_color": r[4],
+            "google_review_url": r[5],
+        }
+        for r in rows
+    ]
+
+
+def get_current_company(user_id: int | None):
+    if not user_id:
+        return None
+
+    company_id = session.get("company_id")
+    conn = sqlite3.connect("database.db")
+    cur = conn.cursor()
+
+    if company_id is not None:
+        cur.execute(
+            "SELECT id, name, logo_url, primary_color, secondary_color, google_review_url "
+            "FROM companies WHERE id = ? AND user_id = ?",
+            (company_id, user_id),
+        )
+        row = cur.fetchone()
+        if row:
+            conn.close()
+            return {
+                "id": row[0],
+                "name": row[1],
+                "logo_url": row[2],
+                "primary_color": row[3],
+                "secondary_color": row[4],
+                "google_review_url": row[5],
+            }
+
+    cur.execute(
+        "SELECT id, name, logo_url, primary_color, secondary_color, google_review_url "
+        "FROM companies WHERE user_id = ? ORDER BY id LIMIT 1",
+        (user_id,),
+    )
+    row = cur.fetchone()
+    conn.close()
+
+    if row:
+        session["company_id"] = row[0]
+        return {
+            "id": row[0],
+            "name": row[1],
+            "logo_url": row[2],
+            "primary_color": row[3],
+            "secondary_color": row[4],
+            "google_review_url": row[5],
+        }
+
+    return None
+
+
 @app.route("/")
 def home():
     if session.get("admin_logged_in"):
@@ -129,13 +226,31 @@ def login():
         cur = conn.cursor()
         cur.execute("SELECT id, username, password_hash, is_admin FROM users WHERE username = ?", (username,))
         row = cur.fetchone()
-        conn.close()
 
         if row and row[2] and check_password_hash(row[2], password):
+            user_id = row[0]
             session["admin_logged_in"] = bool(row[3])
-            session["user_id"] = row[0]
+            session["user_id"] = user_id
             session["username"] = row[1]
+
+            # Ensure at least one company exists for this user
+            cur.execute("SELECT id FROM companies WHERE user_id = ? ORDER BY id LIMIT 1", (user_id,))
+            company = cur.fetchone()
+            if not company:
+                cur.execute(
+                    "INSERT INTO companies (user_id, name) VALUES (?, ?)",
+                    (user_id, f"{row[1]}'s Company"),
+                )
+                conn.commit()
+                company_id = cur.lastrowid
+            else:
+                company_id = company[0]
+
+            session["company_id"] = company_id
+            conn.close()
             return redirect(url_for("admin"))
+
+        conn.close()
 
         error = "Invalid credentials. Please try again."
 
@@ -217,24 +332,31 @@ def logout():
 @login_required
 def admin():
 
+    user_id = session.get("user_id")
+    company = get_current_company(user_id)
+    companies = get_companies_for_user(user_id)
+
     conn = sqlite3.connect("database.db")
     cur = conn.cursor()
 
-    # Ensure the employees table exists (safety for fresh deployments)
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS employees (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    scans INTEGER NOT NULL DEFAULT 0
+    cur.execute(
+        "SELECT id, name, scans, good_count, ok_count, bad_count "
+        "FROM employees WHERE company_id = ?",
+        (company["id"],),
     )
-    """)
-
-    cur.execute("SELECT id, name, scans, good_count, ok_count, bad_count FROM employees")
     employees = cur.fetchall()
 
     conn.close()
 
-    return render_template("admin.html", employees=employees, brand_name=BRAND_NAME, brand_tagline=BRAND_TAGLINE, brand_logo_url=BRAND_LOGO_URL)
+    return render_template(
+        "admin.html",
+        employees=employees,
+        brand_name=company["name"] if company else BRAND_NAME,
+        brand_tagline=BRAND_TAGLINE,
+        brand_logo_url=company["logo_url"] if company else BRAND_LOGO_URL,
+        companies=companies,
+        current_company=company,
+    )
 
 @app.route("/add_employee", methods=["POST"])
 @login_required
@@ -245,7 +367,10 @@ def add_employee():
     conn = sqlite3.connect("database.db")
     cur = conn.cursor()
 
-    cur.execute("INSERT INTO employees (name) VALUES (?)",(name,))
+    company = get_current_company(session.get("user_id"))
+    company_id = company["id"] if company else 1
+
+    cur.execute("INSERT INTO employees (company_id, name) VALUES (?, ?)", (company_id, name))
     employee_id = cur.lastrowid
 
     conn.commit()
@@ -311,13 +436,46 @@ def delete_employee(employee_id):
 
 @app.route("/review/<employee_id>")
 def review(employee_id):
-    return render_template("feedback.html", employee_id=employee_id)
+    # For now we only brand by name/logo; company colors are handled in CSS variables
+    conn = sqlite3.connect("database.db")
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT c.name, c.logo_url FROM employees e "
+        "JOIN companies c ON e.company_id = c.id "
+        "WHERE e.id = ?",
+        (employee_id,),
+    )
+    row = cur.fetchone()
+    conn.close()
+
+    brand_name = row[0] if row else BRAND_NAME
+    brand_logo_url = row[1] if row else BRAND_LOGO_URL
+
+    return render_template(
+        "feedback.html",
+        employee_id=employee_id,
+        brand_name=brand_name,
+        brand_tagline=BRAND_TAGLINE,
+        brand_logo_url=brand_logo_url,
+    )
 # SERVER STARTS HERE
 @app.route("/good/<employee_id>")
 def good(employee_id):
 
     conn = sqlite3.connect("database.db")
     cur = conn.cursor()
+
+    # Find the employee's company and its Google review URL
+    cur.execute("SELECT company_id FROM employees WHERE id = ?", (employee_id,))
+    row = cur.fetchone()
+    if not row:
+        conn.close()
+        return redirect("https://google.com")
+
+    company_id = row[0]
+    cur.execute("SELECT google_review_url FROM companies WHERE id = ?", (company_id,))
+    company_row = cur.fetchone()
+    google_url = company_row[0] if company_row and company_row[0] else "https://google.com"
 
     cur.execute(
         "UPDATE employees SET scans = scans + 1, good_count = good_count + 1 WHERE id=?",
@@ -326,27 +484,64 @@ def good(employee_id):
 
     # Record a "good" rating so it shows up in the per-employee matrix
     cur.execute(
-        "INSERT INTO feedback (employee_id, rating, comment) VALUES (?, ?, ?)",
-        (employee_id, "good", ""),
+        "INSERT INTO feedback (company_id, employee_id, rating, comment) VALUES (?, ?, ?, ?)",
+        (company_id, employee_id, "good", ""),
     )
-
 
     conn.commit()
     conn.close()
 
-    return redirect("https://g.page/r/CQVXCUw7251qEBM/review")
+    return redirect(google_url)
 
 @app.route("/ok/<employee_id>")
 def ok(employee_id):
-    return render_template("internal_feedback.html",
-                           employee_id=employee_id,
-                           rating="ok")
+    conn = sqlite3.connect("database.db")
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT c.name, c.logo_url FROM employees e "
+        "JOIN companies c ON e.company_id = c.id "
+        "WHERE e.id = ?",
+        (employee_id,),
+    )
+    row = cur.fetchone()
+    conn.close()
+
+    brand_name = row[0] if row else BRAND_NAME
+    brand_logo_url = row[1] if row else BRAND_LOGO_URL
+
+    return render_template(
+        "internal_feedback.html",
+        employee_id=employee_id,
+        rating="ok",
+        brand_name=brand_name,
+        brand_tagline=BRAND_TAGLINE,
+        brand_logo_url=brand_logo_url,
+    )
 
 @app.route("/bad/<employee_id>")
 def bad(employee_id):
-    return render_template("internal_feedback.html",
-                           employee_id=employee_id,
-                           rating="bad")
+    conn = sqlite3.connect("database.db")
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT c.name, c.logo_url FROM employees e "
+        "JOIN companies c ON e.company_id = c.id "
+        "WHERE e.id = ?",
+        (employee_id,),
+    )
+    row = cur.fetchone()
+    conn.close()
+
+    brand_name = row[0] if row else BRAND_NAME
+    brand_logo_url = row[1] if row else BRAND_LOGO_URL
+
+    return render_template(
+        "internal_feedback.html",
+        employee_id=employee_id,
+        rating="bad",
+        brand_name=brand_name,
+        brand_tagline=BRAND_TAGLINE,
+        brand_logo_url=brand_logo_url,
+    )
 
 @app.route("/submit_internal_feedback", methods=["POST"])
 def submit_internal_feedback():
@@ -360,8 +555,14 @@ def submit_internal_feedback():
     conn = sqlite3.connect("database.db")
     cur = conn.cursor()
 
+    # Look up company for this employee
+    cur.execute("SELECT company_id FROM employees WHERE id = ?", (employee_id,))
+    row = cur.fetchone()
+    company_id = row[0] if row else 1
+
     cur.execute(
-        "INSERT INTO feedback (employee_id, rating, comment) VALUES (?, ?, ?)", (employee_id, rating, comment)
+        "INSERT INTO feedback (company_id, employee_id, rating, comment) VALUES (?, ?, ?, ?)",
+        (company_id, employee_id, rating, comment),
     )
 
     # Update total scans and per-rating counters
@@ -388,6 +589,9 @@ def feedback():
     conn = sqlite3.connect("database.db")
     cur = conn.cursor()
 
+    company = get_current_company(session.get("user_id"))
+    company_id = company["id"] if company else 1
+
     cur.execute("""
     SELECT feedback.id,
            employees.name,
@@ -397,14 +601,21 @@ def feedback():
            feedback.created_at
     FROM feedback
     JOIN employees ON feedback.employee_id = employees.id
+    WHERE feedback.company_id = ?
     ORDER BY datetime(feedback.created_at) DESC, feedback.id DESC
-    """)
+    """, (company_id,))
 
     feedback_list = cur.fetchall()
 
     conn.close()
 
-    return render_template("feedback_list.html", feedback=feedback_list, brand_name=BRAND_NAME, brand_tagline=BRAND_TAGLINE, brand_logo_url=BRAND_LOGO_URL)
+    return render_template(
+        "feedback_list.html",
+        feedback=feedback_list,
+        brand_name=company["name"] if company else BRAND_NAME,
+        brand_tagline=BRAND_TAGLINE,
+        brand_logo_url=company["logo_url"] if company else BRAND_LOGO_URL,
+    )
 
 
 @app.route("/feedback/<int:feedback_id>/status", methods=["POST"])
@@ -428,11 +639,14 @@ def update_feedback_status(feedback_id: int):
 def export_employees_csv():
     conn = sqlite3.connect("database.db")
     cur = conn.cursor()
+    company = get_current_company(session.get("user_id"))
+    company_id = company["id"] if company else 1
     cur.execute("""
     SELECT id, name, scans, good_count, ok_count, bad_count
     FROM employees
+    WHERE company_id = ?
     ORDER BY scans DESC, name ASC
-    """)
+    """, (company_id,))
     rows = cur.fetchall()
     conn.close()
 
@@ -455,6 +669,8 @@ def export_employees_csv():
 def export_feedback_csv():
     conn = sqlite3.connect("database.db")
     cur = conn.cursor()
+    company = get_current_company(session.get("user_id"))
+    company_id = company["id"] if company else 1
     cur.execute("""
     SELECT feedback.id,
            feedback.employee_id,
@@ -465,8 +681,9 @@ def export_feedback_csv():
            feedback.created_at
     FROM feedback
     JOIN employees ON feedback.employee_id = employees.id
+    WHERE feedback.company_id = ?
     ORDER BY datetime(feedback.created_at) DESC, feedback.id DESC
-    """)
+    """, (company_id,))
     rows = cur.fetchall()
     conn.close()
 
@@ -494,14 +711,17 @@ def employee_dashboard():
     cur = conn.cursor()
 
     cur.execute(
-        "SELECT id, name, scans, good_count, ok_count, bad_count FROM employees WHERE id = ?",
+        "SELECT id, name, company_id, scans, good_count, ok_count, bad_count FROM employees WHERE id = ?",
         (employee_id,),
     )
     employee = cur.fetchone()
 
+    company_id = employee[2] if employee else 1
+
     cur.execute(
         "SELECT id, name, scans, good_count, ok_count, bad_count "
-        "FROM employees ORDER BY scans DESC, name ASC"
+        "FROM employees WHERE company_id = ? ORDER BY scans DESC, name ASC",
+        (company_id,),
     )
     leaderboard = cur.fetchall()
 
@@ -517,7 +737,7 @@ def employee_dashboard():
 
     return render_template(
         "employee_dashboard.html",
-        employee=employee,
+        employee=(employee[0], employee[1], employee[3], employee[4], employee[5], employee[6]) if employee else None,
         leaderboard=leaderboard,
         feedback_rows=feedback_rows,
         brand_name=BRAND_NAME,
@@ -531,6 +751,8 @@ def employee_dashboard():
 def analytics():
     conn = sqlite3.connect("database.db")
     cur = conn.cursor()
+    company = get_current_company(session.get("user_id"))
+    company_id = company["id"] if company else 1
 
     # Daily breakdown
     cur.execute("""
@@ -540,9 +762,10 @@ def analytics():
            SUM(CASE WHEN rating = 'ok' THEN 1 ELSE 0 END) as ok_count,
            SUM(CASE WHEN rating = 'bad' THEN 1 ELSE 0 END) as bad_count
     FROM feedback
+    WHERE company_id = ?
     GROUP BY day
     ORDER BY day DESC
-    """)
+    """, (company_id,))
     daily_stats = cur.fetchall()
 
     # Last 30 days per employee
@@ -555,10 +778,12 @@ def analytics():
     FROM employees e
     LEFT JOIN feedback f
       ON f.employee_id = e.id
+     AND f.company_id = ?
      AND DATE(f.created_at) >= DATE('now', '-30 day')
+    WHERE e.company_id = ?
     GROUP BY e.id, e.name
     ORDER BY (good_30d + ok_30d + bad_30d) DESC, e.name ASC
-    """)
+    """, (company_id, company_id))
     per_employee_30d = cur.fetchall()
 
     conn.close()
@@ -574,7 +799,7 @@ def analytics():
 
 @app.route("/thankyou")
 def thankyou():
-    return render_template("thankyou.html")
+    return render_template("thankyou.html", brand_name=BRAND_NAME, brand_tagline=BRAND_TAGLINE, brand_logo_url=BRAND_LOGO_URL)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
