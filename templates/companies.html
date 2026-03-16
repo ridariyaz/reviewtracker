@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Company Settings · {{ brand_name or 'ReviewTracker' }}</title>
+  <style>
+    :root {
+      --primary: #0d6efd;
+      --bg: #f3f5fb;
+      --card-bg: #ffffff;
+      --border-soft: #e2e6f0;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+    }
+    .topbar {
+      background: #020617;
+      color: #e5e7eb;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 1px 4px rgba(15, 23, 42, 0.4);
+      gap: 12px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      min-width: 200px;
+    }
+    .brand-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 0, #38bdf8, #4f46e5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #e5e7eb;
+    }
+    .brand-sub {
+      font-size: 11px;
+      color: #9ca3af;
+    }
+    .top-nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .nav-link {
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      color: #cbd5f5;
+      font-size: 14px;
+      text-decoration: none;
+    }
+    .nav-link:hover {
+      border-color: #4f46e5;
+      background: rgba(79, 70, 229, 0.12);
+    }
+    .btn-outline { border-color: #4b5563; }
+    .btn-outline:hover {
+      border-color: #ef4444;
+      background: rgba(239, 68, 68, 0.15);
+    }
+    .page {
+      max-width: 1120px;
+      margin: 24px auto 40px;
+      padding: 0 16px;
+    }
+    .page-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .page-subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+    }
+    .layout {
+      display: grid;
+      gap: 18px;
+    }
+    @media (min-width: 900px) {
+      .layout {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+      }
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 18px 20px 20px;
+      box-shadow: 0 14px 32px rgba(15, 23, 42, 0.16);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .field {
+      margin-bottom: 10px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 4px;
+      color: #374151;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border-soft);
+      background: #f9fafb;
+      font-size: 14px;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.35);
+      background: #ffffff;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: none;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      background: var(--primary);
+      color: #ffffff;
+    }
+    .btn:hover { filter: brightness(0.95); }
+    .muted { color: var(--text-muted); font-size: 13px; }
+    .row {
+      display: grid;
+      gap: 10px;
+    }
+    @media (min-width: 700px) {
+      .row {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .company-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .company-item {
+      padding: 10px 12px;
+      border: 1px solid var(--border-soft);
+      border-radius: 12px;
+      margin-bottom: 10px;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: #dbeafe;
+      color: #1d4ed8;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-badge">R</div>
+      <div>
+        <div>{{ brand_name or 'ReviewTracker' }}</div>
+        <div class="brand-sub">{{ brand_tagline or 'Employee QR review funnel' }}</div>
+      </div>
+    </div>
+    <div class="top-nav">
+      <a class="nav-link" href="/admin">Dashboard</a>
+      <a class="nav-link" href="/feedback">Feedback</a>
+      <a class="nav-link" href="/analytics">Analytics</a>
+      <a class="nav-link" href="/companies">Company settings</a>
+      <a class="nav-link btn-outline" href="/logout">Logout</a>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="page-title">Company settings</div>
+    <div class="page-subtitle">Manage your companies, brand kit, and the Google Review URL used for “Good” feedback.</div>
+
+    <div class="layout">
+      <div class="card">
+        <div class="card-title">Your companies</div>
+        <ul class="company-list">
+          {% for c in companies %}
+          <li class="company-item">
+            <div>
+              <div style="font-weight:600;">{{ c.name }}</div>
+              <div class="muted">ID #{{ c.id }}</div>
+            </div>
+            {% if current_company and c.id == current_company.id %}
+              <span class="pill">Active</span>
+            {% else %}
+              <form action="/companies/switch" method="POST" style="margin:0;">
+                <input type="hidden" name="company_id" value="{{ c.id }}">
+                <button class="btn" type="submit">Switch</button>
+              </form>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+
+        <hr style="border:none;border-top:1px solid var(--border-soft);margin:16px 0;">
+
+        <div class="card-title">Create new company</div>
+        <form action="/companies/create" method="POST">
+          <div class="field">
+            <label>Company name</label>
+            <input name="name" placeholder="e.g. Acme Dental" required>
+          </div>
+          <div class="field">
+            <label>Logo URL (optional)</label>
+            <input name="logo_url" placeholder="https://.../logo.png">
+          </div>
+          <div class="row">
+            <div class="field">
+              <label>Primary color</label>
+              <input name="primary_color" placeholder="#0d6efd" value="#0d6efd">
+            </div>
+            <div class="field">
+              <label>Secondary color</label>
+              <input name="secondary_color" placeholder="#111827" value="#111827">
+            </div>
+          </div>
+          <div class="field">
+            <label>Google review URL (optional)</label>
+            <input name="google_review_url" placeholder="https://g.page/.../review">
+          </div>
+          <button class="btn" type="submit">Create company</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Edit active company brand kit</div>
+        {% if current_company %}
+        <form action="/companies/{{ current_company.id }}/update" method="POST">
+          <div class="field">
+            <label>Company name</label>
+            <input name="name" value="{{ current_company.name }}" required>
+          </div>
+          <div class="field">
+            <label>Logo URL</label>
+            <input name="logo_url" value="{{ current_company.logo_url or '' }}" placeholder="https://.../logo.png">
+            <div class="muted" style="margin-top:6px;">Used in admin + customer pages.</div>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label>Primary color</label>
+              <input name="primary_color" value="{{ current_company.primary_color or '#0d6efd' }}" placeholder="#0d6efd">
+            </div>
+            <div class="field">
+              <label>Secondary color</label>
+              <input name="secondary_color" value="{{ current_company.secondary_color or '#111827' }}" placeholder="#111827">
+            </div>
+          </div>
+          <div class="field">
+            <label>Google review URL</label>
+            <input name="google_review_url" value="{{ current_company.google_review_url or '' }}" placeholder="https://g.page/.../review">
+            <div class="muted" style="margin-top:6px;">Customers who press “Good” get redirected here.</div>
+          </div>
+          <button class="btn" type="submit">Save changes</button>
+        </form>
+        {% else %}
+        <p class="muted">No company found. Create a company first.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</body>
+</html>

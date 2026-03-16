@@ -308,6 +308,18 @@
       <a class="nav-link" href="/admin">Dashboard</a>
       <a class="nav-link" href="/feedback">Feedback</a>
       <a class="nav-link" href="/analytics">Analytics</a>
+      <a class="nav-link" href="/companies">Company settings</a>
+      {% if companies %}
+      <form action="/companies/switch" method="POST" style="margin:0;">
+        <select name="company_id" onchange="this.form.submit()" style="padding:6px 10px;border-radius:999px;border:1px solid #374151;background:#0b1220;color:#e5e7eb;">
+          {% for c in companies %}
+          <option value="{{ c.id }}" {% if current_company and c.id == current_company.id %}selected{% endif %}>
+            {{ c.name }}
+          </option>
+          {% endfor %}
+        </select>
+      </form>
+      {% endif %}
       <a class="nav-link btn-outline" href="/logout">Logout</a>
     </div>
   </div>

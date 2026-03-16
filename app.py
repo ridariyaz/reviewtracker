@@ -329,6 +329,105 @@ def logout():
     return redirect(url_for("login"))
 
 
+@app.route("/companies")
+@login_required
+def companies_settings():
+    user_id = session.get("user_id")
+    companies = get_companies_for_user(user_id)
+    current_company = get_current_company(user_id)
+    return render_template(
+        "companies.html",
+        companies=companies,
+        current_company=current_company,
+        brand_name=current_company["name"] if current_company else BRAND_NAME,
+        brand_tagline=BRAND_TAGLINE,
+        brand_logo_url=current_company["logo_url"] if current_company else BRAND_LOGO_URL,
+    )
+
+
+@app.route("/companies/create", methods=["POST"])
+@login_required
+def create_company():
+    user_id = session.get("user_id")
+    name = request.form.get("name", "").strip()
+    if not name:
+        return redirect(url_for("companies_settings"))
+
+    conn = sqlite3.connect("database.db")
+    cur = conn.cursor()
+    cur.execute(
+        "INSERT INTO companies (user_id, name, logo_url, primary_color, secondary_color, google_review_url) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+        (
+            user_id,
+            name,
+            request.form.get("logo_url", "").strip() or None,
+            request.form.get("primary_color", "").strip() or "#0d6efd",
+            request.form.get("secondary_color", "").strip() or "#111827",
+            request.form.get("google_review_url", "").strip() or None,
+        ),
+    )
+    conn.commit()
+    company_id = cur.lastrowid
+    conn.close()
+
+    session["company_id"] = company_id
+    return redirect(url_for("companies_settings"))
+
+
+@app.route("/companies/<int:company_id>/update", methods=["POST"])
+@login_required
+def update_company(company_id: int):
+    user_id = session.get("user_id")
+
+    conn = sqlite3.connect("database.db")
+    cur = conn.cursor()
+    cur.execute("SELECT id FROM companies WHERE id = ? AND user_id = ?", (company_id, user_id))
+    row = cur.fetchone()
+    if not row:
+        conn.close()
+        return redirect(url_for("companies_settings"))
+
+    cur.execute(
+        "UPDATE companies SET name = ?, logo_url = ?, primary_color = ?, secondary_color = ?, google_review_url = ? "
+        "WHERE id = ? AND user_id = ?",
+        (
+            request.form.get("name", "").strip() or "Company",
+            request.form.get("logo_url", "").strip() or None,
+            request.form.get("primary_color", "").strip() or "#0d6efd",
+            request.form.get("secondary_color", "").strip() or "#111827",
+            request.form.get("google_review_url", "").strip() or None,
+            company_id,
+            user_id,
+        ),
+    )
+    conn.commit()
+    conn.close()
+    return redirect(url_for("companies_settings"))
+
+
+@app.route("/companies/switch", methods=["POST"])
+@login_required
+def switch_company():
+    user_id = session.get("user_id")
+    company_id = request.form.get("company_id")
+    try:
+        company_id_int = int(company_id)
+    except (TypeError, ValueError):
+        return redirect(url_for("admin"))
+
+    conn = sqlite3.connect("database.db")
+    cur = conn.cursor()
+    cur.execute("SELECT id FROM companies WHERE id = ? AND user_id = ?", (company_id_int, user_id))
+    row = cur.fetchone()
+    conn.close()
+
+    if row:
+        session["company_id"] = company_id_int
+
+    return redirect(request.referrer or url_for("admin"))
+
+
 @app.route("/admin")
 @login_required
 def admin():
