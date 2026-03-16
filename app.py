@@ -982,6 +982,15 @@ def employee_dashboard():
     )
 
 
+@app.route("/employee/qr")
+@employee_login_required
+def employee_qr_fullscreen():
+    employee_id = session.get("employee_id")
+    if not employee_id:
+        return redirect(url_for("employee_login"))
+    return render_template("employee_qr.html", employee_id=employee_id)
+
+
 @app.route("/analytics")
 @login_required
 def analytics():

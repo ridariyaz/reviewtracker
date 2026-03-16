@@ -83,6 +83,18 @@
       {% if employee %}
       <p class="muted">Show this QR to customers to capture feedback.</p>
       <img src="/static/qrcodes/{{ employee[0] }}.png" width="160" alt="Your QR code">
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+        <a href="/static/qrcodes/{{ employee[0] }}.png" download="employee_{{ employee[0] }}_qr.png" style="text-decoration:none;">
+          <button style="padding:8px 12px;border-radius:999px;border:none;font-size:12px;font-weight:500;cursor:pointer;background:var(--primary);color:#fff;">
+            Download QR
+          </button>
+        </a>
+        <a href="/employee/qr" style="text-decoration:none;">
+          <button style="padding:8px 12px;border-radius:999px;border:none;font-size:12px;font-weight:500;cursor:pointer;background:#111827;color:#fff;">
+            Fullscreen view
+          </button>
+        </a>
+      </div>
       {% else %}
       <p class="muted">Employee not found.</p>
       {% endif %}
