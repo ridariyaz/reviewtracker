@@ -540,7 +540,7 @@ def review(employee_id):
     conn = sqlite3.connect("database.db")
     cur = conn.cursor()
     cur.execute(
-        "SELECT c.name, c.logo_url FROM employees e "
+        "SELECT c.name, c.logo_url, c.primary_color, c.secondary_color FROM employees e "
         "JOIN companies c ON e.company_id = c.id "
         "WHERE e.id = ?",
         (employee_id,),
@@ -550,6 +550,8 @@ def review(employee_id):
 
     brand_name = row[0] if row else BRAND_NAME
     brand_logo_url = row[1] if row else BRAND_LOGO_URL
+    brand_primary_color = row[2] if row and row[2] else "#0d6efd"
+    brand_secondary_color = row[3] if row and row[3] else "#020617"
 
     return render_template(
         "feedback.html",
@@ -557,6 +559,8 @@ def review(employee_id):
         brand_name=brand_name,
         brand_tagline=BRAND_TAGLINE,
         brand_logo_url=brand_logo_url,
+        brand_primary_color=brand_primary_color,
+        brand_secondary_color=brand_secondary_color,
     )
 # SERVER STARTS HERE
 @app.route("/good/<employee_id>")
@@ -598,7 +602,7 @@ def ok(employee_id):
     conn = sqlite3.connect("database.db")
     cur = conn.cursor()
     cur.execute(
-        "SELECT c.name, c.logo_url FROM employees e "
+        "SELECT c.name, c.logo_url, c.primary_color, c.secondary_color FROM employees e "
         "JOIN companies c ON e.company_id = c.id "
         "WHERE e.id = ?",
         (employee_id,),
@@ -608,6 +612,8 @@ def ok(employee_id):
 
     brand_name = row[0] if row else BRAND_NAME
     brand_logo_url = row[1] if row else BRAND_LOGO_URL
+    brand_primary_color = row[2] if row and row[2] else "#0d6efd"
+    brand_secondary_color = row[3] if row and row[3] else "#020617"
 
     return render_template(
         "internal_feedback.html",
@@ -616,6 +622,8 @@ def ok(employee_id):
         brand_name=brand_name,
         brand_tagline=BRAND_TAGLINE,
         brand_logo_url=brand_logo_url,
+        brand_primary_color=brand_primary_color,
+        brand_secondary_color=brand_secondary_color,
     )
 
 @app.route("/bad/<employee_id>")
@@ -623,7 +631,7 @@ def bad(employee_id):
     conn = sqlite3.connect("database.db")
     cur = conn.cursor()
     cur.execute(
-        "SELECT c.name, c.logo_url FROM employees e "
+        "SELECT c.name, c.logo_url, c.primary_color, c.secondary_color FROM employees e "
         "JOIN companies c ON e.company_id = c.id "
         "WHERE e.id = ?",
         (employee_id,),
@@ -633,6 +641,8 @@ def bad(employee_id):
 
     brand_name = row[0] if row else BRAND_NAME
     brand_logo_url = row[1] if row else BRAND_LOGO_URL
+    brand_primary_color = row[2] if row and row[2] else "#0d6efd"
+    brand_secondary_color = row[3] if row and row[3] else "#020617"
 
     return render_template(
         "internal_feedback.html",
@@ -641,6 +651,8 @@ def bad(employee_id):
         brand_name=brand_name,
         brand_tagline=BRAND_TAGLINE,
         brand_logo_url=brand_logo_url,
+        brand_primary_color=brand_primary_color,
+        brand_secondary_color=brand_secondary_color,
     )
 
 @app.route("/submit_internal_feedback", methods=["POST"])
