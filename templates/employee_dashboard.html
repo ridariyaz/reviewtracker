@@ -5,7 +5,7 @@
   <title>My Performance · {{ brand_name or 'ReviewTracker' }}</title>
   <style>
     :root {
-      --primary: #0d6efd;
+      --primary: {{ brand_primary_color or '#0d6efd' }};
       --bg: #f3f5fb;
       --card-bg: #ffffff;
       --border-soft: #e2e6f0;
@@ -20,7 +20,7 @@
       color: var(--text-main);
     }
     .topbar {
-      background: #020617;
+      background: {{ brand_secondary_color or '#020617' }};
       color: #e5e7eb;
       padding: 14px 24px;
       display: flex;
@@ -65,7 +65,12 @@
 </head>
 <body>
   <div class="topbar">
-    <div>Employee dashboard</div>
+    <div>
+      {% if brand_logo_url %}
+      <img src="{{ brand_logo_url }}" alt="{{ brand_name }} logo" style="max-height:36px;vertical-align:middle;margin-right:8px;">
+      {% endif %}
+      <span>{{ brand_name or 'Employee dashboard' }}</span>
+    </div>
     <div>
       {{ employee[1] if employee else '' }}
       · <a href="/employee/logout" style="color:#e5e7eb;text-decoration:none;">Logout</a>

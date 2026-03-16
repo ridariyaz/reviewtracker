@@ -879,6 +879,17 @@ def employee_dashboard():
 
     company_id = employee[2] if employee else 1
 
+    # Load company brand kit for this employee
+    cur.execute(
+        "SELECT name, logo_url, primary_color, secondary_color FROM companies WHERE id = ?",
+        (company_id,),
+    )
+    company_row = cur.fetchone()
+    company_name = company_row[0] if company_row else BRAND_NAME
+    company_logo = company_row[1] if company_row else BRAND_LOGO_URL
+    company_primary = company_row[2] if company_row and company_row[2] else "#0d6efd"
+    company_secondary = company_row[3] if company_row and company_row[3] else "#0f172a"
+
     cur.execute(
         "SELECT id, name, scans, good_count, ok_count, bad_count "
         "FROM employees WHERE company_id = ? ORDER BY scans DESC, name ASC",
@@ -901,9 +912,11 @@ def employee_dashboard():
         employee=(employee[0], employee[1], employee[3], employee[4], employee[5], employee[6]) if employee else None,
         leaderboard=leaderboard,
         feedback_rows=feedback_rows,
-        brand_name=BRAND_NAME,
+        brand_name=company_name,
         brand_tagline=BRAND_TAGLINE,
-        brand_logo_url=BRAND_LOGO_URL,
+        brand_logo_url=company_logo,
+        brand_primary_color=company_primary,
+        brand_secondary_color=company_secondary,
     )
 
 
