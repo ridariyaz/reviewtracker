@@ -7,9 +7,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
 
-import psycopg2
-import psycopg2.extras
-
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-me-in-production")
 
@@ -20,25 +17,12 @@ BRAND_LOGO_URL = os.environ.get("BRAND_LOGO_URL")
 
 def get_db():
     """
-    Returns (connection, kind) where kind is 'postgres' or 'sqlite'.
-    If DATABASE_URL is set, use Postgres; otherwise use local SQLite.
+    Returns (connection, kind) where kind is 'sqlite'.
+    Placeholder for future Postgres support; currently always uses SQLite for stability.
     """
-    url = os.environ.get("DATABASE_URL")
-    if not url:
-        conn = sqlite3.connect("database.db")
-        conn.row_factory = sqlite3.Row
-        return conn, "sqlite"
-
-    parsed = urlparse(url)
-    conn = psycopg2.connect(
-        dbname=parsed.path.lstrip("/"),
-        user=parsed.username,
-        password=parsed.password,
-        host=parsed.hostname,
-        port=parsed.port or 5432,
-        cursor_factory=psycopg2.extras.DictCursor,
-    )
-    return conn, "postgres"
+    conn = sqlite3.connect("database.db")
+    conn.row_factory = sqlite3.Row
+    return conn, "sqlite"
 
 
 conn, _db_kind = get_db()
