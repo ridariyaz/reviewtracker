@@ -6,6 +6,8 @@ from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
+from PIL import Image
+from colorthief import ColorThief
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-me-in-production")
@@ -23,6 +25,40 @@ def get_db():
     conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
     return conn, "sqlite"
+
+
+def save_logo_and_extract_colors(file_storage, company_id: int):
+    """
+    Save uploaded logo to static/logos and return (logo_url, primary_hex, secondary_hex).
+    If anything fails or no file is provided, returns (None, None, None).
+    """
+    if not file_storage or file_storage.filename == "":
+        return None, None, None
+
+    os.makedirs("static/logos", exist_ok=True)
+    ext = os.path.splitext(file_storage.filename)[1].lower() or ".png"
+    filename = f"company_{company_id}{ext}"
+    filepath = os.path.join("static", "logos", filename)
+
+    # Save file
+    file_storage.save(filepath)
+
+    try:
+        ct = ColorThief(filepath)
+        dominant = ct.get_color(quality=3)
+        palette = ct.get_palette(color_count=3, quality=3)
+        secondary = palette[1] if palette and len(palette) > 1 else dominant
+
+        def rgb_to_hex(rgb):
+            return "#{:02x}{:02x}{:02x}".format(rgb[0], rgb[1], rgb[2])
+
+        primary_hex = rgb_to_hex(dominant)
+        secondary_hex = rgb_to_hex(secondary)
+        logo_url = f"/static/logos/{filename}"
+        return logo_url, primary_hex, secondary_hex
+    except Exception:
+        # Fall back to just returning the saved logo path
+        return f"/static/logos/{filename}", None, None
 
 
 conn, _db_kind = get_db()
@@ -367,20 +403,31 @@ def create_company():
 
     conn = sqlite3.connect("database.db")
     cur = conn.cursor()
+
+    # Insert bare company to get id
     cur.execute(
-        "INSERT INTO companies (user_id, name, logo_url, primary_color, secondary_color, google_review_url) "
-        "VALUES (?, ?, ?, ?, ?, ?)",
-        (
-            user_id,
-            name,
-            request.form.get("logo_url", "").strip() or None,
-            request.form.get("primary_color", "").strip() or "#0d6efd",
-            request.form.get("secondary_color", "").strip() or "#111827",
-            request.form.get("google_review_url", "").strip() or None,
-        ),
+        "INSERT INTO companies (user_id, name) VALUES (?, ?)",
+        (user_id, name),
     )
     conn.commit()
     company_id = cur.lastrowid
+
+    logo_file = request.files.get("logo_file")
+    logo_url_from_form = request.form.get("logo_url", "").strip() or None
+
+    logo_url, auto_primary, auto_secondary = save_logo_and_extract_colors(logo_file, company_id)
+
+    primary_color = auto_primary or (request.form.get("primary_color", "").strip() or "#0d6efd")
+    secondary_color = auto_secondary or (request.form.get("secondary_color", "").strip() or "#111827")
+    final_logo_url = logo_url or logo_url_from_form
+    google_review_url = request.form.get("google_review_url", "").strip() or None
+
+    cur.execute(
+        "UPDATE companies SET logo_url = ?, primary_color = ?, secondary_color = ?, google_review_url = ? "
+        "WHERE id = ? AND user_id = ?",
+        (final_logo_url, primary_color, secondary_color, google_review_url, company_id, user_id),
+    )
+    conn.commit()
     conn.close()
 
     session["company_id"] = company_id
@@ -394,21 +441,35 @@ def update_company(company_id: int):
 
     conn = sqlite3.connect("database.db")
     cur = conn.cursor()
-    cur.execute("SELECT id FROM companies WHERE id = ? AND user_id = ?", (company_id, user_id))
-    row = cur.fetchone()
-    if not row:
+    cur.execute("SELECT logo_url, primary_color, secondary_color FROM companies WHERE id = ? AND user_id = ?", (company_id, user_id))
+    existing = cur.fetchone()
+    if not existing:
         conn.close()
         return redirect(url_for("companies_settings"))
+
+    existing_logo = existing[0]
+    existing_primary = existing[1] or "#0d6efd"
+    existing_secondary = existing[2] or "#111827"
+
+    logo_file = request.files.get("logo_file")
+    logo_url_from_form = request.form.get("logo_url", "").strip() or None
+
+    logo_url, auto_primary, auto_secondary = save_logo_and_extract_colors(logo_file, company_id)
+
+    primary_color = auto_primary or (request.form.get("primary_color", "").strip() or existing_primary)
+    secondary_color = auto_secondary or (request.form.get("secondary_color", "").strip() or existing_secondary)
+    final_logo_url = logo_url or logo_url_from_form or existing_logo
+    google_review_url = request.form.get("google_review_url", "").strip() or None
 
     cur.execute(
         "UPDATE companies SET name = ?, logo_url = ?, primary_color = ?, secondary_color = ?, google_review_url = ? "
         "WHERE id = ? AND user_id = ?",
         (
             request.form.get("name", "").strip() or "Company",
-            request.form.get("logo_url", "").strip() or None,
-            request.form.get("primary_color", "").strip() or "#0d6efd",
-            request.form.get("secondary_color", "").strip() or "#111827",
-            request.form.get("google_review_url", "").strip() or None,
+            final_logo_url,
+            primary_color,
+            secondary_color,
+            google_review_url,
             company_id,
             user_id,
         ),
