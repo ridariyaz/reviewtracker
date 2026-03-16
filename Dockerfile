@@ -2,9 +2,13 @@ FROM python:3.13-slim
 
 WORKDIR /app
 
-# Install system dependencies (libpq for Postgres, build tools for some wheels)
+# Install system dependencies:
+# - libpq-dev for Postgres clients
+# - build-essential for compiling wheels if needed
+# - image libs for Pillow (JPEG/PNG/zlib)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev build-essential \
+    libjpeg-dev zlib1g-dev libpng-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
