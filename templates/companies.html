@@ -272,7 +272,19 @@
             <label>Logo image (upload) or URL</label>
             <input type="file" name="logo_file" accept="image/*">
             <input name="logo_url" value="{{ current_company.logo_url or '' }}" placeholder="https://.../logo.png">
-            <div class="muted" style="margin-top:6px;">Used in admin + customer pages.</div>
+            <div class="muted" style="margin-top:6px;">Used in admin + customer pages. Previewed below.</div>
+          </div>
+          <div class="field">
+            <label>Customer logo preview</label>
+            <div style="display:flex;justify-content:center;margin-top:4px;">
+              <div style="width:96px;height:96px;border-radius:999px;overflow:hidden;border:2px solid rgba(148,163,184,0.6);box-shadow:0 8px 25px rgba(0,0,0,0.45);background:#020617;display:flex;align-items:center;justify-content:center;">
+                {% if current_company.logo_url %}
+                <img src="{{ current_company.logo_url }}" alt="{{ current_company.name }} logo" style="width:100%;height:100%;object-fit:cover;">
+                {% else %}
+                <span class="muted">No logo yet</span>
+                {% endif %}
+              </div>
+            </div>
           </div>
           <div class="row">
             <div class="field">
