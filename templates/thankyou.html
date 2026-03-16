@@ -46,6 +46,11 @@
 </head>
 <body>
   <div class="card">
+    {% if brand_logo_url %}
+    <div style="margin-bottom:12px;">
+      <img src="{{ brand_logo_url }}" alt="{{ brand_name }} logo" style="max-width:140px;max-height:80px;object-fit:contain;">
+    </div>
+    {% endif %}
     <h1>Thank you for your feedback</h1>
     <p>We read every response and use it to coach our team and improve how we serve you.</p>
     <p class="small">You can close this window now.</p>
