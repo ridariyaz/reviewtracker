@@ -310,6 +310,7 @@ def login():
 def signup():
     error = None
     if request.method == "POST":
+        email = request.form.get("email", "").strip()
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "").strip()
 
@@ -326,8 +327,8 @@ def signup():
             else:
                 password_hash = generate_password_hash(password)
                 cur.execute(
-                    "INSERT INTO users (username, password_hash, is_admin, provider) VALUES (?, ?, ?, ?)",
-                    (username, password_hash, 1, "local"),
+                    "INSERT INTO users (email, username, password_hash, is_admin, provider) VALUES (?, ?, ?, ?, ?)",
+                    (email or None, username, password_hash, 1, "local"),
                 )
                 conn.commit()
                 conn.close()
