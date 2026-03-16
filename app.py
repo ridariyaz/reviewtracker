@@ -470,6 +470,43 @@ def admin():
         current_company=company,
     )
 
+
+@app.route("/employees")
+@login_required
+def employees_page():
+    user_id = session.get("user_id")
+    company = get_current_company(user_id)
+    conn = sqlite3.connect("database.db")
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT id, name, employee_username, scans, good_count, ok_count, bad_count "
+        "FROM employees WHERE company_id = ? ORDER BY name ASC",
+        (company["id"] if company else 1,),
+    )
+    rows = cur.fetchall()
+    conn.close()
+
+    employees = [
+        {
+            "id": r[0],
+            "name": r[1],
+            "employee_username": r[2],
+            "scans": r[3],
+            "good_count": r[4],
+            "ok_count": r[5],
+            "bad_count": r[6],
+        }
+        for r in rows
+    ]
+
+    return render_template(
+        "employees.html",
+        employees=employees,
+        brand_name=company["name"] if company else BRAND_NAME,
+        brand_tagline=BRAND_TAGLINE,
+        brand_logo_url=company["logo_url"] if company else BRAND_LOGO_URL,
+    )
+
 @app.route("/add_employee", methods=["POST"])
 @login_required
 def add_employee():
