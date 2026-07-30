@@ -79,6 +79,28 @@
   </div>
 
   <div class="page">
+    <!-- Employee Quick Guide Banner -->
+    <div class="card" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-color: #bfdbfe;">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+        <div style="width:36px; height:36px; border-radius:999px; background:#2563eb; color:#fff; font-size:18px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">📱</div>
+        <div>
+          <h3 style="margin:0; font-size:16px; color:#1e3a8a;">How to Use Your Review QR</h3>
+          <div style="font-size:12px; color:#1e40af; margin-top:2px;">Follow these 3 easy steps to start capturing Google Reviews:</div>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:10px; margin-top:12px;">
+        <div style="background:#ffffff; padding:10px 14px; border-radius:10px; font-size:12px; border:1px solid #dbeafe;">
+          <strong style="color:#2563eb;">1. Open or Save QR:</strong> Tap <em>"Fullscreen View"</em> below or save the QR image to your phone's photo library.
+        </div>
+        <div style="background:#ffffff; padding:10px 14px; border-radius:10px; font-size:12px; border:1px solid #dbeafe;">
+          <strong style="color:#2563eb;">2. Show to Customer:</strong> Ask happy customers at checkout or tables to point their phone camera at your QR.
+        </div>
+        <div style="background:#ffffff; padding:10px 14px; border-radius:10px; font-size:12px; border:1px solid #dbeafe;">
+          <strong style="color:#2563eb;">3. Watch Yourself Rank:</strong> Happy customers get routed straight to Google. Track your stats & rank on the leaderboard!
+        </div>
+      </div>
+    </div>
+
     <div class="card">
       <h2>Your QR code</h2>
       <p class="muted">Show this QR to customers to capture feedback.</p>

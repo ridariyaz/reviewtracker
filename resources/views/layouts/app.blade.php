@@ -110,6 +110,7 @@
       <a class="nav-link" href="{{ route('feedback.index') }}">Feedback</a>
       <a class="nav-link" href="{{ route('analytics') }}">Analytics</a>
       <a class="nav-link" href="{{ route('companies.index') }}">Company settings</a>
+      <a class="nav-link" href="{{ route('help') }}">Help & Guide</a>
       @isset($companies)
         @if($companies->count())
         <form action="{{ route('companies.switch') }}" method="POST" style="margin:0;">

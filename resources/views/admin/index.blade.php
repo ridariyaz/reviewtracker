@@ -10,9 +10,26 @@
         Add employees, generate QR codes, preview the customer journey and track who is driving the most reviews.
       </div>
     </div>
-    <div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <a href="{{ route('help') }}" class="btn btn-secondary" style="background:#475569;">📖 Explainer Guide</a>
       <a href="{{ route('feedback.index') }}" class="btn btn-secondary">Open feedback inbox</a>
     </div>
+  </div>
+
+  <!-- Quick Start Banner -->
+  <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 1px solid #bfdbfe; border-radius: 14px; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+    <div style="display:flex; align-items:center; gap: 14px; flex-wrap: wrap;">
+      <div style="width:40px; height:40px; border-radius:999px; background:#2563eb; color:#fff; font-size:20px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">⚡</div>
+      <div>
+        <div style="font-weight:700; font-size:15px; color:#1e3a8a;">Quick Start Guide</div>
+        <div style="font-size:13px; color:#1e40af; margin-top:2px;">
+          <strong>1.</strong> Add staff member below &nbsp;➔&nbsp;
+          <strong>2.</strong> Staff shows QR to customer &nbsp;➔&nbsp;
+          <strong>3.</strong> 5-Star reviews route to Google!
+        </div>
+      </div>
+    </div>
+    <a href="{{ route('help') }}" style="font-size:13px; font-weight:600; color:#2563eb; text-decoration:none; white-space:nowrap;">View Full Guide →</a>
   </div>
 
   <div style="display:grid;gap:20px;" class="layout">
