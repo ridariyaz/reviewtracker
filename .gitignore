@@ -25,5 +25,6 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
-/legacy-flask/venv/
-/legacy-flask/database.db
+/legacy-flask/
+/legacy-python/venv/
+/legacy-python/database.db
