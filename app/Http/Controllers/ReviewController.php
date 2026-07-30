@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Employee;
 use App\Models\Feedback;
+use App\Models\ScanLog;
 use Illuminate\Http\Request;
 
 /**
@@ -15,9 +16,17 @@ use Illuminate\Http\Request;
 class ReviewController extends Controller
 {
     /** Customer landing page after scanning an employee QR. */
-    public function show(Employee $employee)
+    public function show(Request $request, Employee $employee)
     {
         $company = $employee->company;
+
+        ScanLog::create([
+            'company_id' => $employee->company_id,
+            'employee_id' => $employee->id,
+            'ip_address' => $request->ip(),
+            'user_agent' => substr((string) $request->userAgent(), 0, 500),
+            'device_type' => $this->detectDeviceType($request->userAgent()),
+        ]);
 
         return view('review.feedback', [
             'employeeId' => $employee->id,
@@ -111,5 +120,21 @@ class ReviewController extends Controller
             'brandPrimaryColor' => $company?->primary_color ?? '#0d6efd',
             'brandSecondaryColor' => $company?->secondary_color ?? '#020617',
         ]);
+    }
+
+    private function detectDeviceType(?string $ua): string
+    {
+        if (! $ua) {
+            return 'mobile';
+        }
+        $ua = strtolower($ua);
+        if (str_contains($ua, 'ipad') || str_contains($ua, 'tablet')) {
+            return 'tablet';
+        }
+        if (str_contains($ua, 'mobile') || str_contains($ua, 'iphone') || str_contains($ua, 'android')) {
+            return 'mobile';
+        }
+
+        return 'desktop';
     }
 }

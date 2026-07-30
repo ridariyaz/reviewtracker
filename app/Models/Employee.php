@@ -52,4 +52,9 @@ class Employee extends Authenticatable
     {
         return $this->hasMany(Feedback::class);
     }
+
+    public function scanLogs(): HasMany
+    {
+        return $this->hasMany(ScanLog::class);
+    }
 }
