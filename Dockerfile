@@ -1,24 +1,36 @@
-FROM python:3.13-slim
+FROM php:8.4-apache
 
-WORKDIR /app
-
-# Install system dependencies:
-# - libpq-dev for Postgres clients
-# - build-essential for compiling wheels if needed
-# - image libs for Pillow (JPEG/PNG/zlib)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq-dev build-essential \
-    libjpeg-dev zlib1g-dev libpng-dev \
+    git unzip libpq-dev libzip-dev libpng-dev libjpeg62-turbo-dev libfreetype6-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) pdo_pgsql pgsql zip gd bcmath opcache \
+    && a2enmod rewrite headers \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copy application code
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
+    && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
+    && printf '<Directory /var/www/html/public>\n    AllowOverride All\n    Require all granted\n</Directory>\n' \
+       > /etc/apache2/conf-available/laravel.conf \
+    && a2enconf laravel
+
+WORKDIR /var/www/html
+
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
+
 COPY . .
+RUN composer dump-autoload --optimize \
+    && chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R ug+rwx storage bootstrap/cache
+
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 ENV PORT=8080
+EXPOSE 8080
 
-CMD ["sh", "-c", "gunicorn app:app --bind 0.0.0.0:$PORT"]
-
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["apache2-foreground"]

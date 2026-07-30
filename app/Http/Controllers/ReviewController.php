@@ -1,0 +1,115 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Employee;
+use App\Models\Feedback;
+use Illuminate\Http\Request;
+
+/**
+ * Public customer review funnel (no authentication).
+ *
+ * Flow: /review/{id} → Good redirects to Google review URL;
+ * OK/Bad collect private comments then /thankyou.
+ */
+class ReviewController extends Controller
+{
+    /** Customer landing page after scanning an employee QR. */
+    public function show(Employee $employee)
+    {
+        $company = $employee->company;
+
+        return view('review.feedback', [
+            'employeeId' => $employee->id,
+            'brandName' => $company?->name ?? config('app.name'),
+            'brandLogoUrl' => $company?->logo_url,
+            'brandPrimaryColor' => $company?->primary_color ?? '#0d6efd',
+            'brandSecondaryColor' => $company?->secondary_color ?? '#020617',
+        ]);
+    }
+
+    /**
+     * Record a "good" rating and send the customer to the company's Google review page.
+     * Falls back to google.com when google_review_url is not configured.
+     */
+    public function good(Employee $employee)
+    {
+        $company = $employee->company;
+        $googleUrl = $company?->google_review_url ?: 'https://google.com';
+
+        $employee->increment('scans');
+        $employee->increment('good_count');
+
+        Feedback::create([
+            'company_id' => $employee->company_id,
+            'employee_id' => $employee->id,
+            'rating' => 'good',
+            'comment' => '',
+            'status' => 'new',
+        ]);
+
+        return redirect()->away($googleUrl);
+    }
+
+    /** Show private feedback form for an "OK" rating. */
+    public function ok(Employee $employee)
+    {
+        return $this->internalForm($employee, 'ok');
+    }
+
+    /** Show private feedback form for a "Bad" rating. */
+    public function bad(Employee $employee)
+    {
+        return $this->internalForm($employee, 'bad');
+    }
+
+    /** Persist OK/Bad private comments and bump employee counters. */
+    public function submitInternal(Request $request)
+    {
+        $data = $request->validate([
+            'employee_id' => ['required', 'integer', 'exists:employees,id'],
+            'rating' => ['required', 'in:ok,bad'],
+            'comment' => ['nullable', 'string'],
+        ]);
+
+        $employee = Employee::findOrFail($data['employee_id']);
+
+        Feedback::create([
+            'company_id' => $employee->company_id,
+            'employee_id' => $employee->id,
+            'rating' => $data['rating'],
+            'comment' => $data['comment'] ?? '',
+            'status' => 'new',
+        ]);
+
+        $employee->increment('scans');
+        if ($data['rating'] === 'ok') {
+            $employee->increment('ok_count');
+        } else {
+            $employee->increment('bad_count');
+        }
+
+        return redirect()->route('thankyou');
+    }
+
+    public function thankyou()
+    {
+        return view('review.thankyou', [
+            'brandName' => config('app.name'),
+        ]);
+    }
+
+    private function internalForm(Employee $employee, string $rating)
+    {
+        $company = $employee->company;
+
+        return view('review.internal', [
+            'employeeId' => $employee->id,
+            'rating' => $rating,
+            'brandName' => $company?->name ?? config('app.name'),
+            'brandLogoUrl' => $company?->logo_url,
+            'brandPrimaryColor' => $company?->primary_color ?? '#0d6efd',
+            'brandSecondaryColor' => $company?->secondary_color ?? '#020617',
+        ]);
+    }
+}

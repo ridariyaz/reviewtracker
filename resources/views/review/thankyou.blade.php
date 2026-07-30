@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Thank you · {{ $brandName }}</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #0f172a, #020617 55%);
+      color: #e5e7eb;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px; text-align: center;
+    }
+    .card {
+      width: 100%; max-width: 460px;
+      background: rgba(15, 23, 42, 0.95);
+      border-radius: 24px; padding: 26px 24px 28px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.65);
+      border: 1px solid rgba(148,163,184,0.4);
+    }
+    h1 { font-size: 26px; margin: 0 0 8px; color: #4ade80; }
+    p { margin: 0 0 4px; font-size: 14px; color: #9ca3af; }
+    .small { font-size: 12px; color: #6b7280; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Thank you for your feedback</h1>
+    <p>We read every response and use it to coach our team and improve how we serve you.</p>
+    <p class="small">You can close this window now.</p>
+  </div>
+</body>
+</html>
