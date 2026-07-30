@@ -61,6 +61,8 @@ class SettingsController extends Controller
 
         $data = $request->validate([
             'language' => ['required', 'in:en,ml,hi,ar'],
+            'notification_email' => ['nullable', 'email', 'max:255'],
+            'enable_multi_review_prompt' => ['nullable', 'boolean'],
             'custom_link_name' => ['nullable', 'array'],
             'custom_link_name.*' => ['nullable', 'string', 'max:255'],
             'custom_link_url' => ['nullable', 'array'],
@@ -82,6 +84,8 @@ class SettingsController extends Controller
 
         $company->update([
             'language' => $data['language'],
+            'notification_email' => $data['notification_email'] ?? null,
+            'enable_multi_review_prompt' => $request->has('enable_multi_review_prompt'),
             'custom_links' => $customLinks,
         ]);
 

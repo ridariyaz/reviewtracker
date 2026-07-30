@@ -37,7 +37,10 @@ class MultiPlatformReviewTest extends TestCase
             'user_id' => $user->id,
             'name' => 'Acme Cafe',
             'google_review_url' => 'https://g.page/r/test/review',
-            'tripadvisor_review_url' => 'https://www.tripadvisor.com/UserReview-test',
+            'enable_multi_review_prompt' => true,
+            'custom_links' => [
+                ['name' => 'TripAdvisor', 'url' => 'https://www.tripadvisor.com/UserReview-test'],
+            ],
         ]);
         $employee = Employee::create([
             'company_id' => $company->id,

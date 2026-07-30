@@ -16,7 +16,7 @@ use Illuminate\Http\Request;
 class ReviewController extends Controller
 {
     /** Customer landing page after scanning an employee QR. */
-    public function show(Request $request, Employee $employee)
+    public function show(Request $request, Employee $employee, \App\Services\LanguageService $langService)
     {
         $company = $employee->company;
 
@@ -28,12 +28,15 @@ class ReviewController extends Controller
             'device_type' => $this->detectDeviceType($request->userAgent()),
         ]);
 
+        $translations = $langService->getTranslations($company?->language);
+
         return view('review.feedback', [
             'employeeId' => $employee->id,
             'brandName' => $company?->name ?? config('app.name'),
             'brandLogoUrl' => $company?->logo_url,
             'brandPrimaryColor' => $company?->primary_color ?? '#0d6efd',
             'brandSecondaryColor' => $company?->secondary_color ?? '#020617',
+            'txt' => $translations,
         ]);
     }
 
@@ -41,7 +44,7 @@ class ReviewController extends Controller
      * Record a "good" rating and send the customer to the company's Google review page.
      * Falls back to google.com when google_review_url is not configured.
      */
-    public function good(Employee $employee)
+    public function good(Employee $employee, \App\Services\LanguageService $langService)
     {
         $company = $employee->company;
         $googleUrl = $company?->google_review_url ?: 'https://google.com';
@@ -60,6 +63,8 @@ class ReviewController extends Controller
         $destinations = $company?->configuredReviewDestinations() ?? [];
 
         if (count($destinations) > 1) {
+            $translations = $langService->getTranslations($company?->language);
+
             return view('review.multi_destination', [
                 'employee' => $employee,
                 'destinations' => $destinations,
@@ -67,6 +72,7 @@ class ReviewController extends Controller
                 'brandLogoUrl' => $company?->logo_url,
                 'brandPrimaryColor' => $company?->primary_color ?? '#0d6efd',
                 'brandSecondaryColor' => $company?->secondary_color ?? '#020617',
+                'txt' => $translations,
             ]);
         }
 
@@ -114,16 +120,19 @@ class ReviewController extends Controller
         return redirect()->route('thankyou');
     }
 
-    public function thankyou()
+    public function thankyou(\App\Services\LanguageService $langService)
     {
         return view('review.thankyou', [
             'brandName' => config('app.name'),
+            'txt' => $langService->getTranslations('en'),
         ]);
     }
 
     private function internalForm(Employee $employee, string $rating)
     {
         $company = $employee->company;
+        $langService = new \App\Services\LanguageService();
+        $translations = $langService->getTranslations($company?->language);
 
         return view('review.internal', [
             'employeeId' => $employee->id,
@@ -132,6 +141,7 @@ class ReviewController extends Controller
             'brandLogoUrl' => $company?->logo_url,
             'brandPrimaryColor' => $company?->primary_color ?? '#0d6efd',
             'brandSecondaryColor' => $company?->secondary_color ?? '#020617',
+            'txt' => $translations,
         ]);
     }
 

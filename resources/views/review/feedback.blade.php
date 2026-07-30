@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html dir="{{ $txt['dir'] ?? 'ltr' }}">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>How was your experience? · {{ $brandName }}</title>
+  <title>{{ $txt['headline'] }} · {{ $brandName }}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
@@ -54,6 +54,7 @@
       font-size: 16px; font-weight: 600; cursor: pointer; text-decoration: none;
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); text-align: left;
     }
+    html[dir="rtl"] .btn-option { text-align: right; }
     .btn-option:hover { transform: translateY(-2px); }
     
     .btn-good {
@@ -77,7 +78,9 @@
     .btn-bad:hover { background: rgba(248, 113, 113, 0.22); border-color: #f87171; }
     
     .emoji-icon { font-size: 24px; margin-right: 12px; }
+    html[dir="rtl"] .emoji-icon { margin-right: 0; margin-left: 12px; }
     .arrow-icon { font-size: 18px; opacity: 0.7; }
+    html[dir="rtl"] .arrow-icon { transform: rotate(180deg); }
   </style>
 </head>
 <body>
@@ -88,14 +91,14 @@
     </div>
     @endif
     <div class="pill"><span>{{ $brandName }}</span></div>
-    <h1>How was your experience?</h1>
-    <p>Your feedback takes only 5 seconds and helps us deliver great service!</p>
+    <h1>{{ $txt['headline'] }}</h1>
+    <p>{{ $txt['subheadline'] }}</p>
 
     <div class="rating-options">
       <a class="btn-option btn-good" href="{{ route('review.good', $employeeId) }}">
         <span style="display:flex;align-items:center;">
           <span class="emoji-icon">😍</span>
-          <span>Great!</span>
+          <span>{{ $txt['great'] }}</span>
         </span>
         <span class="arrow-icon">➔</span>
       </a>
@@ -103,7 +106,7 @@
       <a class="btn-option btn-ok" href="{{ route('review.ok', $employeeId) }}">
         <span style="display:flex;align-items:center;">
           <span class="emoji-icon">😊</span>
-          <span>It was OK</span>
+          <span>{{ $txt['ok'] }}</span>
         </span>
         <span class="arrow-icon">➔</span>
       </a>
@@ -111,7 +114,7 @@
       <a class="btn-option btn-bad" href="{{ route('review.bad', $employeeId) }}">
         <span style="display:flex;align-items:center;">
           <span class="emoji-icon">🙁</span>
-          <span>Needs Improvement</span>
+          <span>{{ $txt['bad'] }}</span>
         </span>
         <span class="arrow-icon">➔</span>
       </a>

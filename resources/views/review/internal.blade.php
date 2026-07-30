@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html dir="{{ $txt['dir'] ?? 'ltr' }}">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token() }}">
-  <title>Tell us more · {{ $brandName }}</title>
+  <title>{{ $txt['improve_title'] }} · {{ $brandName }}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
@@ -34,14 +34,7 @@
       box-shadow: 0 8px 24px rgba(0,0,0,0.4);
     }
     .brand-logo img { width: 100%; height: 100%; object-fit: cover; }
-    .pill {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 5px 14px; border-radius: 999px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      font-size: 12px; font-weight: 600; letter-spacing: 0.05em;
-      color: #cbd5e1; margin-bottom: 14px; text-transform: uppercase;
-    }
+    
     h1 { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 700; margin: 0 0 8px; color: #ffffff; }
     p { margin: 0 0 20px; font-size: 14px; color: #94a3b8; line-height: 1.5; }
     
@@ -70,14 +63,14 @@
       <img src="{{ $brandLogoUrl }}" alt="{{ $brandName }} logo">
     </div>
     @endif
-    <h1>Tell us how we can improve</h1>
-    <p>Your notes go directly to management to help us improve our service.</p>
+    <h1>{{ $txt['improve_title'] }}</h1>
+    <p>{{ $txt['improve_sub'] }}</p>
     <form action="{{ route('review.submit') }}" method="POST">
       @csrf
       <input type="hidden" name="employee_id" value="{{ $employeeId }}">
       <input type="hidden" name="rating" value="{{ $rating }}">
-      <textarea name="comment" placeholder="What worked well, what didn't, or anything specific we should fix..."></textarea>
-      <button type="submit">Submit Feedback</button>
+      <textarea name="comment" placeholder="{{ $txt['placeholder'] }}"></textarea>
+      <button type="submit">{{ $txt['submit'] }}</button>
     </form>
   </div>
 </body>

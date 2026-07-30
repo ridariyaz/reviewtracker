@@ -25,14 +25,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'trustpilot_review_url',
     'custom_links',
     'language',
+    'enable_multi_review_prompt',
+    'notification_email',
 ])]
 class Company extends Model
 {
     protected $casts = [
         'custom_links' => 'array',
+        'enable_multi_review_prompt' => 'boolean',
     ];
 
-    /** Returns array of all active review platform links for multi-destination selection. */
+    /** Returns array of active review platform links for multi-destination selection if enabled. */
     public function configuredReviewDestinations(): array
     {
         $destinations = [];
@@ -47,46 +50,19 @@ class Company extends Model
             ];
         }
 
-        if (! empty($this->tripadvisor_review_url) && filter_var($this->tripadvisor_review_url, FILTER_VALIDATE_URL)) {
-            $destinations[] = [
-                'key' => 'tripadvisor',
-                'name' => 'TripAdvisor',
-                'icon' => '🦉',
-                'bg' => 'linear-gradient(135deg, #00af87, #008767)',
-                'url' => $this->tripadvisor_review_url,
-            ];
-        }
-
-        if (! empty($this->yelp_review_url) && filter_var($this->yelp_review_url, FILTER_VALIDATE_URL)) {
-            $destinations[] = [
-                'key' => 'yelp',
-                'name' => 'Yelp',
-                'icon' => '⭐',
-                'bg' => 'linear-gradient(135deg, #d32323, #af1616)',
-                'url' => $this->yelp_review_url,
-            ];
-        }
-
-        if (! empty($this->trustpilot_review_url) && filter_var($this->trustpilot_review_url, FILTER_VALIDATE_URL)) {
-            $destinations[] = [
-                'key' => 'trustpilot',
-                'name' => 'Trustpilot',
-                'icon' => '★',
-                'bg' => 'linear-gradient(135deg, #00b67a, #008f60)',
-                'url' => $this->trustpilot_review_url,
-            ];
-        }
-
-        if (is_array($this->custom_links)) {
-            foreach ($this->custom_links as $link) {
-                if (! empty($link['name']) && ! empty($link['url']) && filter_var($link['url'], FILTER_VALIDATE_URL)) {
-                    $destinations[] = [
-                        'key' => 'custom_'.md5($link['url']),
-                        'name' => $link['name'],
-                        'icon' => '🔗',
-                        'bg' => 'linear-gradient(135deg, #6366f1, #4f46e5)',
-                        'url' => $link['url'],
-                    ];
+        // Only include secondary destinations if admin explicitly enabled the multi-review toggle switch!
+        if ($this->enable_multi_review_prompt) {
+            if (is_array($this->custom_links)) {
+                foreach ($this->custom_links as $link) {
+                    if (! empty($link['name']) && ! empty($link['url']) && filter_var($link['url'], FILTER_VALIDATE_URL)) {
+                        $destinations[] = [
+                            'key' => 'custom_'.md5($link['url']),
+                            'name' => $link['name'],
+                            'icon' => '🔗',
+                            'bg' => 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                            'url' => $link['url'],
+                        ];
+                    }
                 }
             }
         }
