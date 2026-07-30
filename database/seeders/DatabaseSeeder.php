@@ -28,6 +28,8 @@ class DatabaseSeeder extends Seeder
             'primary_color' => '#0d6efd',
             'secondary_color' => '#020617',
             'google_review_url' => 'https://g.page/r/example/review',
+            'tripadvisor_review_url' => 'https://www.tripadvisor.com/UserReview-example',
+            'trustpilot_review_url' => 'https://www.trustpilot.com/evaluate/example',
         ]);
 
         $qrService = new QrCodeService();

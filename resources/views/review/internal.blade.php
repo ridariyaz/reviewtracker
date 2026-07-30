@@ -70,11 +70,7 @@
       <img src="{{ $brandLogoUrl }}" alt="{{ $brandName }} logo">
     </div>
     @endif
-    <div class="pill">
-      <span>🔒 Private Feedback</span>
-      <span>•</span>
-      <span style="color:#facc15;">{{ strtoupper($rating) }}</span>
-    </div>
+    <div class="pill">Private</div>
     <h1>Tell us how we can improve</h1>
     <p>Your notes go directly to management. They will remain private and will not be posted publicly.</p>
     <form action="{{ route('review.submit') }}" method="POST">
@@ -82,7 +78,7 @@
       <input type="hidden" name="employee_id" value="{{ $employeeId }}">
       <input type="hidden" name="rating" value="{{ $rating }}">
       <textarea name="comment" placeholder="What worked well, what didn't, or anything specific we should fix..."></textarea>
-      <button type="submit">Submit Private Feedback</button>
+      <button type="submit">Submit Feedback</button>
     </form>
   </div>
 </body>

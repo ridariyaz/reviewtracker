@@ -57,6 +57,19 @@ class ReviewController extends Controller
             'status' => 'new',
         ]);
 
+        $destinations = $company?->configuredReviewDestinations() ?? [];
+
+        if (count($destinations) > 1) {
+            return view('review.multi_destination', [
+                'employee' => $employee,
+                'destinations' => $destinations,
+                'brandName' => $company?->name ?? config('app.name'),
+                'brandLogoUrl' => $company?->logo_url,
+                'brandPrimaryColor' => $company?->primary_color ?? '#0d6efd',
+                'brandSecondaryColor' => $company?->secondary_color ?? '#020617',
+            ]);
+        }
+
         return redirect()->away($googleUrl);
     }
 

@@ -140,11 +140,24 @@
           </div>
         </div>
         <div class="field">
-          <label>Google review URL</label>
-          <input class="input" name="google_review_url" value="{{ $currentCompany->google_review_url }}" placeholder="https://g.page/.../review">
-          <div class="muted" style="margin-top:6px;">Customers who press “Good” get redirected here.</div>
+          <label>Google Review URL <span style="color:#ef4444;">*</span></label>
+          <input class="input" name="google_review_url" value="{{ $currentCompany->google_review_url }}" placeholder="https://g.page/.../review" required>
+          <div class="muted" style="margin-top:4px;">Primary destination for positive customer reviews.</div>
         </div>
-        <button class="btn" type="submit">Save changes</button>
+        <div class="field">
+          <label>TripAdvisor Review URL (Optional)</label>
+          <input class="input" name="tripadvisor_review_url" value="{{ $currentCompany->tripadvisor_review_url }}" placeholder="https://www.tripadvisor.com/UserReview-...">
+        </div>
+        <div class="field">
+          <label>Yelp Review URL (Optional)</label>
+          <input class="input" name="yelp_review_url" value="{{ $currentCompany->yelp_review_url }}" placeholder="https://www.yelp.com/biz/...">
+        </div>
+        <div class="field">
+          <label>Trustpilot Review URL (Optional)</label>
+          <input class="input" name="trustpilot_review_url" value="{{ $currentCompany->trustpilot_review_url }}" placeholder="https://www.trustpilot.com/evaluate/...">
+          <div class="muted" style="margin-top:4px;">If multiple platform links are added, customers giving a "Great!" rating can post across multiple sites.</div>
+        </div>
+        <button class="btn" type="submit">Save Brand Kit & Review Links</button>
       </form>
       @else
         <p class="muted">No company found. Create a company first.</p>

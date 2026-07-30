@@ -20,9 +20,59 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'primary_color',
     'secondary_color',
     'google_review_url',
+    'tripadvisor_review_url',
+    'yelp_review_url',
+    'trustpilot_review_url',
 ])]
 class Company extends Model
 {
+    /** Returns array of all active review platform links for multi-destination selection. */
+    public function configuredReviewDestinations(): array
+    {
+        $destinations = [];
+
+        if ($this->hasValidGoogleReviewUrl()) {
+            $destinations[] = [
+                'key' => 'google',
+                'name' => 'Google Reviews',
+                'icon' => '🌐',
+                'bg' => 'linear-gradient(135deg, #4285f4, #34a853)',
+                'url' => $this->google_review_url,
+            ];
+        }
+
+        if (! empty($this->tripadvisor_review_url) && filter_var($this->tripadvisor_review_url, FILTER_VALIDATE_URL)) {
+            $destinations[] = [
+                'key' => 'tripadvisor',
+                'name' => 'TripAdvisor',
+                'icon' => '🦉',
+                'bg' => 'linear-gradient(135deg, #00af87, #008767)',
+                'url' => $this->tripadvisor_review_url,
+            ];
+        }
+
+        if (! empty($this->yelp_review_url) && filter_var($this->yelp_review_url, FILTER_VALIDATE_URL)) {
+            $destinations[] = [
+                'key' => 'yelp',
+                'name' => 'Yelp',
+                'icon' => '⭐',
+                'bg' => 'linear-gradient(135deg, #d32323, #af1616)',
+                'url' => $this->yelp_review_url,
+            ];
+        }
+
+        if (! empty($this->trustpilot_review_url) && filter_var($this->trustpilot_review_url, FILTER_VALIDATE_URL)) {
+            $destinations[] = [
+                'key' => 'trustpilot',
+                'name' => 'Trustpilot',
+                'icon' => '★',
+                'bg' => 'linear-gradient(135deg, #00b67a, #008f60)',
+                'url' => $this->trustpilot_review_url,
+            ];
+        }
+
+        return $destinations;
+    }
     /**
      * True when a usable Google review / Maps URL is configured.
      * Bare google.com is treated as incomplete (that is only a fallback redirect).

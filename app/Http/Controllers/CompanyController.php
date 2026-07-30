@@ -40,6 +40,9 @@ class CompanyController extends Controller
             'primary_color' => ['nullable', 'string', 'max:20'],
             'secondary_color' => ['nullable', 'string', 'max:20'],
             'google_review_url' => ['required', 'url', 'max:2048'],
+            'tripadvisor_review_url' => ['nullable', 'url', 'max:2048'],
+            'yelp_review_url' => ['nullable', 'url', 'max:2048'],
+            'trustpilot_review_url' => ['nullable', 'url', 'max:2048'],
         ]);
 
         $this->assertAcceptableReviewUrl($data['google_review_url']);
@@ -58,6 +61,9 @@ class CompanyController extends Controller
             'primary_color' => $autoPrimary ?: ($data['primary_color'] ?? '#0d6efd'),
             'secondary_color' => $autoSecondary ?: ($data['secondary_color'] ?? '#111827'),
             'google_review_url' => $data['google_review_url'],
+            'tripadvisor_review_url' => $data['tripadvisor_review_url'] ?? null,
+            'yelp_review_url' => $data['yelp_review_url'] ?? null,
+            'trustpilot_review_url' => $data['trustpilot_review_url'] ?? null,
         ]);
 
         session(['company_id' => $company->id]);
@@ -76,6 +82,9 @@ class CompanyController extends Controller
             'primary_color' => ['nullable', 'string', 'max:20'],
             'secondary_color' => ['nullable', 'string', 'max:20'],
             'google_review_url' => ['required', 'url', 'max:2048'],
+            'tripadvisor_review_url' => ['nullable', 'url', 'max:2048'],
+            'yelp_review_url' => ['nullable', 'url', 'max:2048'],
+            'trustpilot_review_url' => ['nullable', 'url', 'max:2048'],
         ]);
 
         $this->assertAcceptableReviewUrl($data['google_review_url']);
@@ -91,6 +100,9 @@ class CompanyController extends Controller
             'primary_color' => $autoPrimary ?: ($data['primary_color'] ?? $company->primary_color),
             'secondary_color' => $autoSecondary ?: ($data['secondary_color'] ?? $company->secondary_color),
             'google_review_url' => $data['google_review_url'],
+            'tripadvisor_review_url' => $data['tripadvisor_review_url'] ?? null,
+            'yelp_review_url' => $data['yelp_review_url'] ?? null,
+            'trustpilot_review_url' => $data['trustpilot_review_url'] ?? null,
         ]);
 
         return redirect()->route('companies.index');
