@@ -98,7 +98,7 @@
   @else
   <div class="topbar">
     <div class="brand">
-      <div class="brand-badge">R</div>
+      <div class="brand-badge">{{ strtoupper(substr($brandName ?? config('app.name'), 0, 1)) }}</div>
       <div>
         <div>{{ $brandName ?? config('app.name') }}</div>
         <div class="brand-sub">Employee QR review funnel</div>

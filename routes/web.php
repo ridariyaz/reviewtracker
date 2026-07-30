@@ -39,13 +39,11 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/signup', [AuthController::class, 'showSignup'])->name('signup');
 Route::post('/signup', [AuthController::class, 'signup']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-Route::get('/logout', [AuthController::class, 'logout']);
 
 // --- Employee authentication ---
 Route::get('/employee/login', [EmployeePortalController::class, 'showLogin'])->name('employee.login');
 Route::post('/employee/login', [EmployeePortalController::class, 'login']);
 Route::post('/employee/logout', [EmployeePortalController::class, 'logout'])->name('employee.logout');
-Route::get('/employee/logout', [EmployeePortalController::class, 'logout']);
 
 // --- Admin (company owners) ---
 Route::middleware('admin')->group(function () {
