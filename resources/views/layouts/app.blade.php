@@ -1,25 +1,26 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="csrf-token" content="{{ csrf_token() }}">
-  <title>@yield('title', 'ReviewTracker')</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary: #0d6efd;
       --primary-dark: #0b5ed7;
-      --bg: #f3f5fb;
+      --bg: #f8fafc;
       --card-bg: #ffffff;
-      --border-soft: #e2e6f0;
-      --text-main: #111827;
-      --text-muted: #6b7280;
+      --border-soft: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+    }
+    h1, h2, h3, h4, .page-title, .card-title {
+      font-family: 'Outfit', 'Inter', sans-serif;
     }
     .topbar {
       background: #020617;
@@ -29,41 +30,46 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      box-shadow: 0 1px 4px rgba(15, 23, 42, 0.4);
+      box-shadow: 0 4px 20px rgba(2, 6, 23, 0.5);
       flex-wrap: wrap;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
     }
     .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; }
     .brand-badge {
-      width: 28px; height: 28px; border-radius: 999px;
-      background: radial-gradient(circle at 30% 0, #38bdf8, #4f46e5);
+      width: 32px; height: 32px; border-radius: 999px;
+      background: linear-gradient(135deg, #38bdf8, #4f46e5);
       display: flex; align-items: center; justify-content: center;
-      font-size: 14px; font-weight: 700; color: #e5e7eb;
+      font-size: 15px; font-weight: 700; color: #ffffff;
+      box-shadow: 0 2px 10px rgba(56, 189, 248, 0.4);
     }
     .brand-sub { font-size: 11px; color: #9ca3af; }
     .top-nav { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .nav-link {
-      padding: 6px 12px; border-radius: 999px; border: 1px solid transparent;
-      color: #cbd5f5; font-size: 14px; text-decoration: none;
+      padding: 6px 14px; border-radius: 999px; border: 1px solid transparent;
+      color: #cbd5f5; font-size: 13px; font-weight: 500; text-decoration: none;
+      transition: all 0.2s ease;
     }
-    .nav-link:hover { border-color: #4f46e5; background: rgba(79, 70, 229, 0.12); }
+    .nav-link:hover { border-color: #4f46e5; background: rgba(79, 70, 229, 0.18); color: #fff; transform: translateY(-1px); }
     .btn-outline { border-color: #4b5563; }
     .btn-outline:hover { border-color: #ef4444; background: rgba(239, 68, 68, 0.15); }
-    .page { max-width: 1120px; margin: 24px auto 40px; padding: 0 16px; }
-    .page-header { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 20px; flex-wrap: wrap; }
-    .page-title { font-size: 24px; font-weight: 600; }
+    .page { max-width: 1160px; margin: 24px auto 40px; padding: 0 16px; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 24px; flex-wrap: wrap; }
+    .page-title { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
     .page-subtitle { margin-top: 4px; font-size: 14px; color: var(--text-muted); }
     .btn {
       display: inline-flex; align-items: center; justify-content: center;
-      padding: 8px 14px; border-radius: 999px; border: 1px solid transparent;
-      font-size: 14px; font-weight: 500; cursor: pointer; background: var(--primary);
-      color: #fff; text-decoration: none;
+      padding: 9px 16px; border-radius: 999px; border: 1px solid transparent;
+      font-size: 14px; font-weight: 600; cursor: pointer; background: var(--primary);
+      color: #fff; text-decoration: none; transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(13, 110, 253, 0.25);
     }
-    .btn:hover { background: var(--primary-dark); }
-    .btn-secondary { background: #111827; }
-    .btn-secondary:hover { background: #030712; }
+    .btn:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(13, 110, 253, 0.35); }
+    .btn-secondary { background: #0f172a; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2); }
+    .btn-secondary:hover { background: #1e293b; box-shadow: 0 6px 16px rgba(15, 23, 42, 0.3); }
     .card {
-      background: var(--card-bg); border-radius: 14px; padding: 18px 20px 20px;
-      box-shadow: 0 14px 32px rgba(15, 23, 42, 0.16); border: 1px solid rgba(148, 163, 184, 0.25);
+      background: var(--card-bg); border-radius: 16px; padding: 22px 24px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05); border: 1px solid rgba(226, 232, 240, 0.8);
+      transition: all 0.2s ease;
     }
     .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
     .card-title { font-size: 16px; font-weight: 600; }

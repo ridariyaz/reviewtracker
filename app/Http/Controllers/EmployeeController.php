@@ -68,7 +68,7 @@ class EmployeeController extends Controller
 
         $data = $request->validate([
             'employee_username' => ['required', 'string', 'max:255'],
-            'employee_password' => ['required', 'string', 'min:4'],
+            'employee_password' => ['required', 'string', 'min:8'],
         ]);
 
         $employee->update([

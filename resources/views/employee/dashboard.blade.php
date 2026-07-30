@@ -112,9 +112,57 @@
     </div>
 
     <div class="card">
-      <h2>Your performance</h2>
-      <p>Total scans: {{ $employee->scans }}</p>
-      <p>Good: {{ $employee->good_count }} · OK: {{ $employee->ok_count }} · Bad: {{ $employee->bad_count }}</p>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <h2 style="margin:0;">Your performance & Achievements</h2>
+        @php
+          $myRank = $leaderboard->search(fn($e) => $e->id === $employee->id);
+          $rankNum = $myRank !== false ? $myRank + 1 : null;
+        @endphp
+        @if($rankNum)
+          <span style="padding:4px 12px; border-radius:999px; font-weight:700; font-size:12px; background:#fefce8; border:1px solid #fde047; color:#a16207;">
+            🏅 Rank #{{ $rankNum }} in Team
+          </span>
+        @endif
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;">
+        @if($rankNum === 1)
+          <span style="padding:6px 14px; border-radius:999px; font-size:12px; font-weight:700; background:linear-gradient(135deg, #fef08a, #eab308); color:#713f12; box-shadow:0 2px 8px rgba(234,179,8,0.3);">
+            🏆 Top Performer of the Month
+          </span>
+        @endif
+
+        @if($employee->good_count > 0)
+          <span style="padding:6px 14px; border-radius:999px; font-size:12px; font-weight:700; background:linear-gradient(135deg, #dcfce7, #22c55e); color:#14532d; box-shadow:0 2px 8px rgba(34,197,94,0.3);">
+            ⭐ 5-Star Champion ({{ $employee->good_count }} Google Reviews)
+          </span>
+        @endif
+
+        @if($employee->scans >= 5)
+          <span style="padding:6px 14px; border-radius:999px; font-size:12px; font-weight:700; background:linear-gradient(135deg, #e0e7ff, #6366f1); color:#1e1b4b; box-shadow:0 2px 8px rgba(99,102,241,0.3);">
+            🚀 High Engagement ({{ $employee->scans }} Scans)
+          </span>
+        @endif
+      </div>
+
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:12px; margin-top:16px;">
+        <div style="background:#f8fafc; padding:12px; border-radius:12px; border:1px solid #e2e8f0; text-align:center;">
+          <div style="font-size:11px; text-transform:uppercase; font-weight:600; color:#64748b;">Total Scans</div>
+          <div style="font-size:24px; font-weight:700; color:#0f172a; margin-top:2px;">{{ $employee->scans }}</div>
+        </div>
+        <div style="background:#f0fdf4; padding:12px; border-radius:12px; border:1px solid #bbf7d0; text-align:center;">
+          <div style="font-size:11px; text-transform:uppercase; font-weight:600; color:#166534;">Good (Google)</div>
+          <div style="font-size:24px; font-weight:700; color:#15803d; margin-top:2px;">{{ $employee->good_count }}</div>
+        </div>
+        <div style="background:#fefce8; padding:12px; border-radius:12px; border:1px solid #fef08a; text-align:center;">
+          <div style="font-size:11px; text-transform:uppercase; font-weight:600; color:#854d0e;">Private OK</div>
+          <div style="font-size:24px; font-weight:700; color:#a16207; margin-top:2px;">{{ $employee->ok_count }}</div>
+        </div>
+        <div style="background:#fef2f2; padding:12px; border-radius:12px; border:1px solid #fecaca; text-align:center;">
+          <div style="font-size:11px; text-transform:uppercase; font-weight:600; color:#991b1b;">Private Bad</div>
+          <div style="font-size:24px; font-weight:700; color:#b91c1c; margin-top:2px;">{{ $employee->bad_count }}</div>
+        </div>
+      </div>
     </div>
 
     <div class="card">

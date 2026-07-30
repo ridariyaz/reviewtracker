@@ -82,10 +82,12 @@ Route::middleware('employee')->group(function () {
     Route::get('/employee/qr', [EmployeePortalController::class, 'qr'])->name('employee.qr');
 });
 
-// --- Public customer review funnel (QR landing) ---
-Route::get('/review/{employee}', [ReviewController::class, 'show'])->name('review.show');
-Route::get('/good/{employee}', [ReviewController::class, 'good'])->name('review.good');
-Route::get('/ok/{employee}', [ReviewController::class, 'ok'])->name('review.ok');
-Route::get('/bad/{employee}', [ReviewController::class, 'bad'])->name('review.bad');
-Route::post('/submit_internal_feedback', [ReviewController::class, 'submitInternal'])->name('review.submit');
-Route::get('/thankyou', [ReviewController::class, 'thankyou'])->name('thankyou');
+// --- Public customer review funnel (QR landing with rate-limiting protection) ---
+Route::middleware('throttle:10,1')->group(function () {
+    Route::get('/review/{employee}', [ReviewController::class, 'show'])->name('review.show');
+    Route::get('/good/{employee}', [ReviewController::class, 'good'])->name('review.good');
+    Route::get('/ok/{employee}', [ReviewController::class, 'ok'])->name('review.ok');
+    Route::get('/bad/{employee}', [ReviewController::class, 'bad'])->name('review.bad');
+    Route::post('/submit_internal_feedback', [ReviewController::class, 'submitInternal'])->name('review.submit');
+    Route::get('/thankyou', [ReviewController::class, 'thankyou'])->name('thankyou');
+});
