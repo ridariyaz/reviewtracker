@@ -32,12 +32,21 @@ class EmployeeController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'employee_username' => ['nullable', 'string', 'max:255'],
+            'employee_password' => ['nullable', 'string', 'min:8'],
         ]);
 
         $company = $companies->ensureDefaultCompany(Auth::user());
-        $employee = $company->employees()->create([
-            'name' => $data['name'],
-        ]);
+        
+        $employeeData = ['name' => $data['name']];
+        if (! empty($data['employee_username'])) {
+            $employeeData['employee_username'] = $data['employee_username'];
+        }
+        if (! empty($data['employee_password'])) {
+            $employeeData['employee_password'] = $data['employee_password'];
+        }
+
+        $employee = $company->employees()->create($employeeData);
 
         // QR encodes the absolute URL to this employee's public review page.
         $qr->generateForEmployee(
@@ -45,7 +54,7 @@ class EmployeeController extends Controller
             route('review.show', $employee->id)
         );
 
-        return redirect()->route('admin');
+        return redirect()->back()->with('success', 'Employee created successfully.');
     }
 
     public function update(Request $request, Employee $employee, CompanyContext $companies)

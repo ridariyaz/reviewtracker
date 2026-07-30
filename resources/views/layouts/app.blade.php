@@ -1,3 +1,9 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>@yield('title', 'ReviewTracker')</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
@@ -50,6 +56,17 @@
       transition: all 0.2s ease;
     }
     .nav-link:hover { border-color: #4f46e5; background: rgba(79, 70, 229, 0.18); color: #fff; transform: translateY(-1px); }
+    .nav-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px;
+      background: #ef4444; color: #ffffff; font-size: 11px; font-weight: 700;
+      margin-left: 6px; box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
+      animation: pulseBadge 2s infinite;
+    }
+    @keyframes pulseBadge {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
     .btn-outline { border-color: #4b5563; }
     .btn-outline:hover { border-color: #ef4444; background: rgba(239, 68, 68, 0.15); }
     .page { max-width: 1160px; margin: 24px auto 40px; padding: 0 16px; }
@@ -75,26 +92,46 @@
     .card-title { font-size: 16px; font-weight: 600; }
     .card-kicker { font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); }
     .input, select, textarea {
-      padding: 10px 12px; font-size: 14px; border-radius: 999px;
+      padding: 10px 14px; font-size: 14px; border-radius: 999px;
       border: 1px solid var(--border-soft); background: #f9fafb; width: 100%;
     }
     textarea { border-radius: 12px; }
     .input:focus, select:focus, textarea:focus {
-      outline: none; border-color: var(--primary); box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.35); background: #fff;
+      outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); background: #fff;
     }
     .table-wrapper { margin-top: 6px; border-radius: 12px; border: 1px solid var(--border-soft); overflow: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e5e7eb; vertical-align: middle; }
-    th { background: #f9fafb; font-weight: 500; color: #4b5563; }
+    th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+    th { background: #f8fafc; font-weight: 600; color: #475569; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
     tr:last-child td { border-bottom: none; }
     .text-right { text-align: right; }
     .pill {
-      padding: 4px 10px; border-radius: 999px; font-size: 12px;
+      padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 500;
       background: #dbeafe; color: #1d4ed8; display: inline-flex; align-items: center; gap: 4px;
     }
     .muted { color: var(--text-muted); font-size: 13px; }
     .field { margin-bottom: 12px; }
-    label { display: block; font-size: 13px; margin-bottom: 4px; color: #374151; }
+    label { display: block; font-size: 13px; margin-bottom: 4px; color: #374151; font-weight: 500; }
+
+    /* Modal System */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(8px); display: flex; align-items: center;
+      justify-content: center; z-index: 1000; opacity: 0; pointer-events: none;
+      transition: opacity 0.25s ease; padding: 16px;
+    }
+    .modal-backdrop.active { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      background: #ffffff; width: 100%; max-width: 480px; border-radius: 20px;
+      padding: 26px; box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+      transform: scale(0.95) translateY(10px); transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+    }
+    .modal-backdrop.active .modal-box { transform: scale(1) translateY(0); }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .modal-title { font-size: 18px; font-weight: 700; color: #0f172a; margin: 0; }
+    .modal-close { background: #f1f5f9; border: none; width: 30px; height: 30px; border-radius: 999px; font-size: 16px; cursor: pointer; color: #64748b; }
+    .modal-close:hover { background: #e2e8f0; color: #0f172a; }
   </style>
   @yield('styles')
 </head>
@@ -113,7 +150,12 @@
     <div class="top-nav">
       <a class="nav-link" href="{{ route('admin') }}">Dashboard</a>
       <a class="nav-link" href="{{ route('employees.index') }}">Employees</a>
-      <a class="nav-link" href="{{ route('feedback.index') }}">Feedback</a>
+      <a class="nav-link" href="{{ route('feedback.index') }}" style="display:inline-flex;align-items:center;">
+        Feedback
+        @if(($unresolvedFeedbackCount ?? 0) > 0)
+          <span class="nav-badge">{{ $unresolvedFeedbackCount }}</span>
+        @endif
+      </a>
       <a class="nav-link" href="{{ route('analytics') }}">Analytics</a>
       <a class="nav-link" href="{{ route('companies.index') }}">Company settings</a>
       <a class="nav-link" href="{{ route('help') }}">Help & Guide</a>
@@ -140,5 +182,7 @@
   <div class="page">
     @yield('content')
   </div>
+
+  @yield('scripts')
 </body>
 </html>

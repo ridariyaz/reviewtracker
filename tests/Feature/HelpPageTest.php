@@ -39,6 +39,6 @@ class HelpPageTest extends TestCase
         $response = $this->actingAs($user)->get('/admin');
 
         $response->assertOk();
-        $response->assertSee('Quick Start Guide');
+        $response->assertSee('Welcome to ReviewTracker!');
     }
 }
