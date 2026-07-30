@@ -31,16 +31,11 @@
       .badge-rank.top1 { border-color:#facc15; background:#fefce8; color:#854d0e; }
       .badge-rank.top2 { border-color:#a1a1aa; background:#f4f4f5; color:#3f3f46; }
       .badge-rank.top3 { border-color:#f97316; background:#fff7ed; color:#9a3412; }
-      details.actions { position:relative; display:inline-block; }
-      details.actions summary { list-style:none; cursor:pointer; padding:4px 10px; border-radius:999px; border:1px solid #cbd5e1; background:#f8fafc; font-size:14px; font-weight:600; }
-      details.actions summary::-webkit-details-marker { display:none; }
-      .actions-menu { position:absolute; right:0; margin-top:6px; padding:12px; border-radius:14px; background:#fff; box-shadow:0 10px 30px rgba(15,23,42,0.18); border:1px solid #e2e8f0; z-index:10; min-width:280px; }
-      .action-inline-form { display:flex; flex-direction:column; gap:8px; margin-bottom:8px; }
-      .action-input { width:100%; padding:8px 12px; font-size:13px; border-radius:999px; border:1px solid #cbd5e1; background:#f8fafc; }
-      .btn-ghost { padding:6px 12px; font-size:12px; font-weight:600; border-radius:999px; border:1px solid transparent; background:#f1f5f9; color:#334155; cursor:pointer; text-align:center; }
-      .btn-ghost:hover { border-color:#cbd5e1; background:#e2e8f0; }
-      .btn-danger { color:#b91c1c; background:#fef2f2; }
-      .btn-danger:hover { background:#fee2e2; }
+      .btn-sm { padding: 4px 10px; font-size: 12px; border-radius: 999px; font-weight: 600; text-decoration: none; border: 1px solid transparent; cursor: pointer; }
+      .btn-sm-edit { background: #f1f5f9; color: #334155; border-color: #cbd5e1; }
+      .btn-sm-edit:hover { background: #e2e8f0; color: #0f172a; }
+      .btn-sm-danger { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+      .btn-sm-danger:hover { background: #fee2e2; }
       .small-link { font-size:12px; color:#2563eb; text-decoration:none; font-weight:600; }
     </style>
 
@@ -83,33 +78,16 @@
             <td class="text-right"><span class="pill" style="background:#fef2f2;color:#b91c1c;">{{ $employee->bad_count }}</span></td>
             <td>
               <img class="qr-thumb" src="{{ asset('storage/qrcodes/'.$employee->id.'.png') }}" width="64" alt="QR for {{ $employee->name }}">
-              <div><a class="small-link" href="{{ route('review.show', $employee) }}" target="_blank">Test Customer Funnel ↗</a></div>
+              <div><a class="small-link" href="{{ route('review.show', $employee) }}" target="_blank">Test QR ↗</a></div>
             </td>
             <td class="text-right">
-              <details class="actions">
-                <summary>Actions ▾</summary>
-                <div class="actions-menu">
-                  <div style="font-size:12px; font-weight:700; color:#475569; margin-bottom:8px;">Edit {{ $employee->name }}</div>
-                  
-                  <form class="action-inline-form" action="{{ route('employees.update', $employee) }}" method="POST">
-                    @csrf
-                    <input class="action-input" type="text" name="name" value="{{ $employee->name }}" placeholder="Full Name">
-                    <button class="btn-ghost" type="submit">Update Name</button>
-                  </form>
-
-                  <form class="action-inline-form" action="{{ route('employees.credentials', $employee) }}" method="POST" style="margin-top:8px;">
-                    @csrf
-                    <input class="action-input" type="text" name="employee_username" value="{{ $employee->employee_username }}" placeholder="Login Username">
-                    <input class="action-input" type="password" name="employee_password" placeholder="New Password (min 8)">
-                    <button class="btn-ghost" type="submit">Update Login Password</button>
-                  </form>
-
-                  <form style="margin-top:10px;" action="{{ route('employees.destroy', $employee) }}" method="POST" onsubmit="return confirm('Remove {{ $employee->name }} and their feedback?');">
-                    @csrf
-                    <button class="btn-ghost btn-danger" style="width:100%;" type="submit">Delete Employee</button>
-                  </form>
-                </div>
-              </details>
+              <div style="display:flex; gap:6px; justify-content:flex-end;">
+                <button class="btn-sm btn-sm-edit" onclick="openEditEmployeeModal('{{ $employee->id }}', '{{ $employee->name }}', '{{ $employee->employee_username }}')">Edit</button>
+                <form action="{{ route('employees.destroy', $employee) }}" method="POST" onsubmit="return confirm('Remove {{ $employee->name }}?');" style="margin:0;">
+                  @csrf
+                  <button class="btn-sm btn-sm-danger" type="submit">Delete</button>
+                </form>
+              </div>
             </td>
           </tr>
           @endforeach
@@ -187,6 +165,35 @@
     </div>
   </div>
 
+  <!-- Edit Employee Modal Popup -->
+  <div id="editEmployeeModal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Edit Staff Credentials</h3>
+        <button class="modal-close" onclick="closeEditEmployeeModal()">✕</button>
+      </div>
+      <form id="editEmployeeForm" method="POST">
+        @csrf
+        <div class="field">
+          <label for="edit_emp_name">Full Name <span style="color:#ef4444;">*</span></label>
+          <input class="input" type="text" id="edit_emp_name" name="name" required>
+        </div>
+        <div class="field">
+          <label for="edit_emp_username">Login Username</label>
+          <input class="input" type="text" id="edit_emp_username" name="employee_username">
+        </div>
+        <div class="field">
+          <label for="edit_emp_password">New Login Password (min 8 chars)</label>
+          <input class="input" type="password" id="edit_emp_password" name="employee_password" placeholder="Leave blank to keep current password">
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+          <button type="button" class="btn btn-secondary" onclick="closeEditEmployeeModal()">Cancel</button>
+          <button type="submit" class="btn">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- First-Time Welcome Modal Popup -->
   <div id="welcomeModal" class="modal-backdrop">
     <div class="modal-box" style="max-width:520px;">
@@ -220,12 +227,22 @@
     document.getElementById('addEmployeeModal').classList.remove('active');
   }
 
+  function openEditEmployeeModal(id, name, username) {
+    document.getElementById('edit_emp_name').value = name;
+    document.getElementById('edit_emp_username').value = username;
+    document.getElementById('editEmployeeForm').action = '/edit_employee/' + id;
+    document.getElementById('editEmployeeModal').classList.add('active');
+  }
+
+  function closeEditEmployeeModal() {
+    document.getElementById('editEmployeeModal').classList.remove('active');
+  }
+
   function dismissWelcomeModal() {
     localStorage.setItem('reviewtracker_welcome_dismissed', '1');
     document.getElementById('welcomeModal').classList.remove('active');
   }
 
-  // Check if first time opening
   document.addEventListener('DOMContentLoaded', function () {
     if (!localStorage.getItem('reviewtracker_welcome_dismissed')) {
       setTimeout(function () {

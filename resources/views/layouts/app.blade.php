@@ -158,6 +158,7 @@
       </a>
       <a class="nav-link" href="{{ route('analytics') }}">Analytics</a>
       <a class="nav-link" href="{{ route('companies.index') }}">Company settings</a>
+      <a class="nav-link" href="{{ route('settings.index') }}">Settings</a>
       <a class="nav-link" href="{{ route('help') }}">Help & Guide</a>
       @isset($companies)
         @if($companies->count())

@@ -67,6 +67,7 @@ class MultiPlatformReviewTest extends TestCase
         $response = $this->get("/ok/{$employee->id}");
 
         $response->assertOk();
-        $response->assertSee('<div class="pill">Private</div>', false);
+        $response->assertSee('Tell us how we can improve');
+        $response->assertDontSee('Private');
     }
 }

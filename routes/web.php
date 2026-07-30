@@ -73,6 +73,10 @@ Route::middleware('admin')->group(function () {
         Route::get('/export/feedback.csv', [FeedbackController::class, 'exportFeedback'])->name('export.feedback');
 
         Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
+
+        Route::get('/settings', [\App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
+        Route::post('/settings/password', [\App\Http\Controllers\SettingsController::class, 'updatePassword'])->name('settings.password');
+        Route::post('/settings/preferences', [\App\Http\Controllers\SettingsController::class, 'updatePreferences'])->name('settings.preferences');
     });
 });
 

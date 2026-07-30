@@ -70,9 +70,8 @@
       <img src="{{ $brandLogoUrl }}" alt="{{ $brandName }} logo">
     </div>
     @endif
-    <div class="pill">Private</div>
     <h1>Tell us how we can improve</h1>
-    <p>Your notes go directly to management. They will remain private and will not be posted publicly.</p>
+    <p>Your notes go directly to management to help us improve our service.</p>
     <form action="{{ route('review.submit') }}" method="POST">
       @csrf
       <input type="hidden" name="employee_id" value="{{ $employeeId }}">

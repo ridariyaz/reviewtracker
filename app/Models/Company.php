@@ -23,9 +23,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'tripadvisor_review_url',
     'yelp_review_url',
     'trustpilot_review_url',
+    'custom_links',
+    'language',
 ])]
 class Company extends Model
 {
+    protected $casts = [
+        'custom_links' => 'array',
+    ];
+
     /** Returns array of all active review platform links for multi-destination selection. */
     public function configuredReviewDestinations(): array
     {
@@ -69,6 +75,20 @@ class Company extends Model
                 'bg' => 'linear-gradient(135deg, #00b67a, #008f60)',
                 'url' => $this->trustpilot_review_url,
             ];
+        }
+
+        if (is_array($this->custom_links)) {
+            foreach ($this->custom_links as $link) {
+                if (! empty($link['name']) && ! empty($link['url']) && filter_var($link['url'], FILTER_VALIDATE_URL)) {
+                    $destinations[] = [
+                        'key' => 'custom_'.md5($link['url']),
+                        'name' => $link['name'],
+                        'icon' => '🔗',
+                        'bg' => 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                        'url' => $link['url'],
+                    ];
+                }
+            }
         }
 
         return $destinations;
