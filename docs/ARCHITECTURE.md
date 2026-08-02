@@ -1,120 +1,118 @@
-# How ReviewTracker works
+# ReviewTracker Technical Architecture
 
-This document explains the product flow and where the code lives so new contributors can orient quickly.
+This document provides a comprehensive overview of the **ReviewTracker** module architecture, data flows, database design, and key components.
 
-## What the product does
+---
 
-ReviewTracker is a **QR → review funnel** for businesses:
+## 1. Executive Summary
 
-1. An **admin** creates a company and employees.
-2. Each employee gets a unique **QR code** pointing at `/review/{employee}`.
-3. A customer scans the QR and picks **Good / OK / Bad**.
-4. **Good** sends them to the company’s public **Google review URL** (and records a good rating).
-5. **OK / Bad** ask for private internal comments (not posted to Google).
-6. Admins see feedback, analytics, and CSV exports. Employees can log in to see their own QR and stats.
+ReviewTracker is a high-converting **QR Code → Review Acceleration & Reputation Gateway** designed for businesses. It solves two critical challenges:
+1. **Public Review Growth**: Increases 5-star Google Reviews by autogenerating human, local SEO-optimized reviews that customers can copy and paste with a single tap.
+2. **Reputation Protection**: Diverts neutral ("Okay") or negative ("Bad") feedback into a private internal feedback system with 1-tap issue chips, preventing public negative reviews.
 
-If `companies.google_review_url` is empty, “Good” falls back to `https://google.com`.
+---
 
-## High-level architecture
+## 2. Component Diagram
 
 ```
-Browser
-  │
-  ▼
-routes/web.php          ← all HTTP routes
-  │
-  ▼
-Http/Controllers/*      ← request handling
-  │
-  ├── Models/*          ← Eloquent + DB tables
-  ├── Services/*        ← QR, logo colors, current company
-  └── resources/views/* ← Blade UI
+┌────────────────────────────────────────────────────────────────────────┐
+│                          Customer Smartphone                           │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ Scan QR Code
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                        Public Review Funnel                            │
+│                                                                        │
+│   GET /review/{employee}  ──►  Landing View (feedback.blade.php)      │
+│                                           │                            │
+│                     ┌─────────────────────┴─────────────────────┐      │
+│                     │                                           │      │
+│          [ 🤩 Great Rating ]                           [ 😐 / 😕 Rating ]│
+│                     │                                           │      │
+│                     ▼                                           ▼      │
+│            GET /good/{employee}                        GET /ok/{employee} │
+│          (good.blade.php view)                    (internal_feedback.blade)│
+│                     │                                           │      │
+│  - Auto-Generate 5-Layer SEO Review                             │      │
+│  - Session Deduplication Set                             - 1-Tap Chips │
+│  - 1-Tap Copy & Open Google                              - Submit to DB│
+│                     │                                           │      │
+│                     ▼                                           ▼      │
+│             Google Review URL                         GET /thankyou    │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
-- **Auth (admins):** Laravel `web` guard → `users` table (`AuthController`).
-- **Auth (employees):** separate `employee` guard → `employees` table (`EmployeePortalController`).
-- **Current company:** stored in session as `company_id` (`CompanyContext`).
+---
 
-## Database (main tables)
+## 3. Database Schema
 
-| Table | Purpose |
-|-------|---------|
-| `users` | Admin accounts (`username` + `password`) |
-| `companies` | Branding, logo, colors, Google review URL; owned by a user |
-| `employees` | Staff under a company; scan counters; optional employee login |
-| `feedback` | Ratings (`good` / `ok` / `bad`), comments, status |
+### `companies` Table
+Stores company configuration, branding, and target review URLs.
 
-Migrations live in `database/migrations/`.
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | `bigint` (Primary Key) | Unique company ID |
+| `user_id` | `bigint` (Foreign Key) | Owner admin user ID |
+| `name` | `string` | Company brand name |
+| `logo_url` | `string` (Nullable) | Brand logo URL |
+| `primary_color` | `string` | Hex primary theme color (e.g. `#0d6efd`) |
+| `secondary_color` | `string` | Hex secondary theme color (e.g. `#020617`) |
+| `google_review_url` | `string` (Nullable) | Target Google Maps / Review URL |
 
-## Customer review funnel (public, no login)
+### `employees` Table
+Stores staff members associated with a company.
 
-| Step | Route | Controller method |
-|------|-------|-------------------|
-| Landing | `GET /review/{employee}` | `ReviewController@show` |
-| Good | `GET /good/{employee}` | `ReviewController@good` → redirect to Google review URL |
-| OK | `GET /ok/{employee}` | `ReviewController@ok` → private comment form |
-| Bad | `GET /bad/{employee}` | `ReviewController@bad` → private comment form |
-| Submit private | `POST /submit_internal_feedback` | `ReviewController@submitInternal` |
-| Thanks | `GET /thankyou` | `ReviewController@thankyou` |
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | `bigint` (Primary Key) | Unique employee ID |
+| `company_id` | `bigint` (Foreign Key) | Associated company ID |
+| `name` | `string` | Staff member full name |
+| `scans` | `integer` | Total QR code scan count |
+| `good_count` | `integer` | Count of positive reviews |
+| `ok_count` | `integer` | Count of neutral reviews |
+| `bad_count` | `integer` | Count of negative reviews |
+| `employee_username`| `string` (Nullable) | Login username for employee portal |
+| `employee_password`| `string` (Nullable) | Hashed login password |
 
-QR PNGs are generated into `storage/app/public/qrcodes/{id}.png` and served via `/storage/...` (`php artisan storage:link`).
+### `feedback` Table
+Stores all logged customer ratings and private internal comments.
 
-## Admin area (middleware `admin`)
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | `bigint` (Primary Key) | Unique feedback log ID |
+| `company_id` | `bigint` (Foreign Key) | Target company ID |
+| `employee_id` | `bigint` (Foreign Key) | Target employee ID |
+| `rating` | `enum('good','ok','bad')` | Rating selection |
+| `comment` | `text` | Private customer feedback text |
+| `status` | `string` | Feedback status (`new`, `reviewed`, `resolved`) |
 
-| Area | Routes | Controller |
-|------|--------|------------|
-| Dashboard | `/admin` | `AdminController` |
-| Companies | `/companies/*` | `CompanyController` |
-| Employees | `/employees`, `/add_employee`, … | `EmployeeController` |
-| Feedback inbox | `/feedback` | `FeedbackController` |
-| Analytics | `/analytics` | `AnalyticsController` |
-| CSV | `/export/*.csv` | `FeedbackController` |
+---
 
-## Employee portal (middleware `employee`)
+## 4. Key Engines & Algorithms
 
-| Area | Routes | Controller |
-|------|--------|------------|
-| Login | `/employee/login` | `EmployeePortalController` |
-| Dashboard | `/employee/dashboard` | stats, feedback, leaderboard, QR |
-| Fullscreen QR | `/employee/qr` | large QR view |
+### 4.1 Combinatorial Local SEO Review Generator
+The review generator in `resources/views/reviews/good.blade.php` operates as a 5-layer combinatorial sentence matrix:
 
-Employee logins are created by an admin via “Set login” on the dashboard (`employee_username` + `employee_password` on `employees`).
+```
+Review = [Opener] + [Practical Detail & SEO Keyword] + [Closing Recommendation]
+```
 
-## Important services
+- **Openers**: 8 natural conversational starters (*"Popped into {company} today..."*).
+- **Details**: 8 practical customer concerns containing Local SEO terms (*"clean store"*, *"fair prices"*, *"fast checkout"*).
+- **Closings**: 6 local business recommendation finishers (*"Definitely my new go-to local shop"*).
 
-| Class | Role |
-|-------|------|
-| `App\Services\CompanyContext` | Resolve / switch the admin’s active company |
-| `App\Services\QrCodeService` | Build PNG QR for an employee review URL |
-| `App\Services\LogoService` | Store uploaded logo + extract brand colors |
+#### Deduplication Mechanism:
+A JavaScript `seenReviews` `Set` tracks generated review hashes during the user's session, guaranteeing that `generateNewReview()` **never produces identical review text twice**.
 
-## Views
+### 4.2 Mobile Pop-up Prevention
+To bypass mobile browser (iOS Safari / Android Chrome) pop-up blockers:
+1. Clipboard write (`navigator.clipboard.writeText`) occurs synchronously inside the touch/click event handler.
+2. Window navigation executes immediately via `window.open(url, '_blank')` or direct location fallback (`window.location.href`).
 
-Blade templates under `resources/views/`:
+---
 
-- `layouts/` — shared admin / auth chrome
-- `auth/` — admin login & signup
-- `admin/`, `companies/`, `employees/`, `feedback/`, `analytics/` — admin UI
-- `review/` — public customer screens
-- `employee/` — employee portal
+## 5. Security & Validation
 
-## Auth middleware
-
-Registered in `bootstrap/app.php`:
-
-- `admin` → `EnsureAdmin` (must be logged in as a user)
-- `employee` → `EnsureEmployee` (must be logged in as an employee)
-
-## Config & deploy notes
-
-- App config: `.env` (see `.env.example`)
-- Production: set `APP_DEBUG=false`, real `APP_URL`, Postgres `DB_*`, and a real Google review URL per company
-- Docker: `Dockerfile` + `docker/entrypoint.sh` (runs migrations, starts Apache)
-- Legacy Flask reference only: `legacy-flask/`
-
-## Typical change examples
-
-- **Change “Good” redirect behavior** → `ReviewController::good`
-- **Change QR generation** → `QrCodeService` + `EmployeeController::store`
-- **Add a new admin page** → route in `routes/web.php` (inside `admin` group) + controller + Blade view
-- **Change schema** → new migration under `database/migrations/`
+1. **CSRF Protection**: All POST routes enforce `@csrf` token validation.
+2. **Mass Assignment Protection**: Models declare `$fillable` arrays to prevent unauthorized column updates.
+3. **Password Security**: Employee passwords are hidden in model serialization (`$hidden = ['employee_password']`).
