@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Company Settings & Preferences · ReviewTracker')
+
 @section('content')
 <style>
     .settings-container {
@@ -13,7 +15,7 @@
         justify-content: space-between;
         margin-bottom: 28px;
         padding-bottom: 16px;
-        border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.1));
+        border-bottom: 1px solid var(--border-color);
     }
     .settings-title {
         display: flex;
@@ -21,6 +23,7 @@
         gap: 12px;
         font-size: 1.6rem;
         font-weight: 700;
+        color: var(--text-heading);
     }
     .settings-title svg {
         width: 28px;
@@ -30,12 +33,12 @@
         fill: none;
     }
     .settings-card {
-        background: var(--card-bg, rgba(15, 23, 42, 0.8));
-        border: 1px solid var(--border-color, rgba(255,255,255,0.1));
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
         border-radius: 16px;
         padding: 24px;
         margin-bottom: 24px;
-        backdrop-filter: blur(12px);
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
     }
     .card-section-title {
         display: flex;
@@ -44,7 +47,7 @@
         font-size: 1.15rem;
         font-weight: 700;
         margin-bottom: 18px;
-        color: var(--text-heading, #f8fafc);
+        color: var(--text-heading);
     }
     .card-section-title svg {
         width: 20px;
@@ -59,28 +62,27 @@
     .form-label {
         display: block;
         font-size: 0.9rem;
-        font-weight: 600;
+        font-weight: 700;
         margin-bottom: 6px;
-        color: var(--text-main, #e2e8f0);
+        color: var(--text-heading);
     }
     .form-control {
         width: 100%;
         padding: 12px 14px;
         border-radius: 10px;
-        border: 1px solid var(--border-color, rgba(255,255,255,0.15));
-        background: var(--input-bg, rgba(0, 0, 0, 0.25));
-        color: var(--text-main, #f8fafc);
+        border: 1px solid var(--border-color);
+        background: var(--input-bg);
+        color: var(--text-heading);
         font-size: 0.95rem;
         transition: border-color 0.2s ease;
     }
     .form-control:focus {
         outline: none;
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        border-color: var(--primary);
     }
     .helper-text {
         font-size: 0.8rem;
-        color: #94a3b8;
+        color: var(--text-muted);
         margin-top: 6px;
         line-height: 1.4;
     }
@@ -95,18 +97,17 @@
         width: 32px;
         height: 32px;
         border-radius: 50%;
-        border: 2px solid rgba(255,255,255,0.2);
+        border: 2px solid rgba(255,255,255,0.4);
         cursor: pointer;
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        transition: transform 0.15s ease;
     }
     .swatch:hover {
         transform: scale(1.15);
-        box-shadow: 0 4px 10px rgba(0,0,0,0.4);
     }
     .btn-add-platform {
-        background: rgba(59, 130, 246, 0.15);
-        border: 1px dashed #3b82f6;
-        color: #60a5fa;
+        background: var(--input-bg);
+        border: 1px dashed var(--primary);
+        color: var(--primary);
         padding: 10px 16px;
         border-radius: 10px;
         font-size: 0.9rem;
@@ -115,14 +116,9 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        transition: all 0.2s ease;
-    }
-    .btn-add-platform:hover {
-        background: rgba(59, 130, 246, 0.25);
-        color: #93c5fd;
     }
     .btn-save {
-        background: #3b82f6;
+        background: var(--primary);
         color: #ffffff;
         border: none;
         padding: 14px 24px;
@@ -133,10 +129,6 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        transition: background 0.2s ease;
-    }
-    .btn-save:hover {
-        background: #2563eb;
     }
     .btn-danger {
         background: #ef4444;
@@ -148,32 +140,11 @@
         font-weight: 600;
         cursor: pointer;
     }
-    .btn-danger:hover {
-        background: #dc2626;
-    }
     .custom-platform-item {
         display: flex;
         gap: 12px;
         margin-bottom: 12px;
         align-items: center;
-    }
-    .theme-toggle-wrapper {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    .theme-toggle-btn {
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        color: #fff;
-        padding: 8px 14px;
-        border-radius: 20px;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 0.85rem;
-        font-weight: 600;
     }
 </style>
 
@@ -181,24 +152,18 @@
     <div class="settings-header">
         <div class="settings-title">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-            <span>Company Settings</span>
-        </div>
-        <div class="theme-toggle-wrapper">
-            <button type="button" class="theme-toggle-btn" onclick="toggleThemeMode()">
-                <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-                <span id="themeLabel">Dark Mode</span>
-            </button>
+            <span>Company Settings & Preferences</span>
         </div>
     </div>
 
     @if(session('success_pref'))
-        <div style="background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.3); color: #4ade80; padding: 14px 18px; border-radius: 12px; margin-bottom: 24px; font-weight: 600;">
+        <div style="background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.3); color: #22c55e; padding: 14px 18px; border-radius: 12px; margin-bottom: 24px; font-weight: 600;">
             ✓ {{ session('success_pref') }}
         </div>
     @endif
 
     @if(session('success_password'))
-        <div style="background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.3); color: #4ade80; padding: 14px 18px; border-radius: 12px; margin-bottom: 24px; font-weight: 600;">
+        <div style="background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.3); color: #22c55e; padding: 14px 18px; border-radius: 12px; margin-bottom: 24px; font-weight: 600;">
             ✓ {{ session('success_password') }}
         </div>
     @endif
@@ -216,37 +181,45 @@
             <div class="form-group">
                 <label class="form-label">Company Name</label>
                 <input type="text" name="name" class="form-control" value="{{ old('name', $company?->name) }}" required>
+                <div class="helper-text">Official business name rendered on customer QR landing pages and printable standees.</div>
             </div>
 
             <div class="form-group">
                 <label class="form-label">Upload Company Logo</label>
-                <input type="file" name="logo_file" class="form-control" accept="image/*" onchange="previewLogo(this)">
+                <input type="file" name="logo_file" class="form-control" accept="image/*">
                 <div class="helper-text">Uploading a logo automatically extracts brand color swatches below.</div>
                 @if($company?->logo_url)
                     <div style="margin-top: 12px;">
-                        <img src="{{ $company->logo_url }}" id="logoPreview" style="max-height: 50px; border-radius: 8px;">
+                        <img src="{{ $company->logo_url }}" style="max-height: 50px; border-radius: 8px;">
                     </div>
                 @endif
             </div>
 
             <div class="form-group">
-                <label class="form-label">Primary Brand Color</label>
-                <input type="color" name="primary_color" id="primaryColorInput" class="form-control" style="height: 48px; padding: 4px;" value="{{ old('primary_color', $company?->primary_color ?? '#0d6efd') }}">
+                <label class="form-label">Primary Brand Color (Color Wheel, Hex Text, or Clickable Logo Swatches)</label>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <input type="color" id="settingsPrimaryWheel" style="width:44px; height:44px; padding:2px; border-radius:10px; border:1px solid var(--border-color); cursor:pointer;" value="{{ old('primary_color', $company?->primary_color ?? '#0d6efd') }}" onchange="syncSettingsPrimary(this.value)">
+                    <input type="text" name="primary_color" id="settingsPrimaryHex" class="form-control" value="{{ old('primary_color', $company?->primary_color ?? '#0d6efd') }}" placeholder="#0d6efd" oninput="syncSettingsPrimary(this.value)">
+                </div>
                 
-                <div class="helper-text">Extracted Logo Color Swatches (Click to set primary color):</div>
+                <div class="helper-text">Extracted Logo Color Swatches (Click any circle to set primary color):</div>
                 <div class="swatches-row">
-                    <div class="swatch" style="background:#0d6efd" onclick="setPrimaryColor('#0d6efd')"></div>
-                    <div class="swatch" style="background:#2563eb" onclick="setPrimaryColor('#2563eb')"></div>
-                    <div class="swatch" style="background:#16a34a" onclick="setPrimaryColor('#16a34a')"></div>
-                    <div class="swatch" style="background:#ea580c" onclick="setPrimaryColor('#ea580c')"></div>
-                    <div class="swatch" style="background:#9333ea" onclick="setPrimaryColor('#9333ea')"></div>
-                    <div class="swatch" style="background:#0f172a" onclick="setPrimaryColor('#0f172a')"></div>
+                    <div class="swatch" style="background:#0d6efd" onclick="syncSettingsPrimary('#0d6efd')"></div>
+                    <div class="swatch" style="background:#2563eb" onclick="syncSettingsPrimary('#2563eb')"></div>
+                    <div class="swatch" style="background:#16a34a" onclick="syncSettingsPrimary('#16a34a')"></div>
+                    <div class="swatch" style="background:#ea580c" onclick="syncSettingsPrimary('#ea580c')"></div>
+                    <div class="swatch" style="background:#9333ea" onclick="syncSettingsPrimary('#9333ea')"></div>
+                    <div class="swatch" style="background:#0f172a" onclick="syncSettingsPrimary('#0f172a')"></div>
                 </div>
             </div>
 
             <div class="form-group">
                 <label class="form-label">Secondary Background Color</label>
-                <input type="color" name="secondary_color" id="secondaryColorInput" class="form-control" style="height: 48px; padding: 4px;" value="{{ old('secondary_color', $company?->secondary_color ?? '#020617') }}">
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <input type="color" id="settingsSecondaryWheel" style="width:44px; height:44px; padding:2px; border-radius:10px; border:1px solid var(--border-color); cursor:pointer;" value="{{ old('secondary_color', $company?->secondary_color ?? '#111827') }}" onchange="syncSettingsSecondary(this.value)">
+                    <input type="text" name="secondary_color" id="settingsSecondaryHex" class="form-control" value="{{ old('secondary_color', $company?->secondary_color ?? '#111827') }}" placeholder="#111827" oninput="syncSettingsSecondary(this.value)">
+                </div>
+                <div class="helper-text">Background accent color for customer review cards and printable standees.</div>
             </div>
         </div>
 
@@ -284,10 +257,11 @@
             </div>
 
             <div class="form-group">
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: var(--text-heading);">
                     <input type="checkbox" name="enable_multi_review_prompt" value="1" {{ $company?->enable_multi_review_prompt ? 'checked' : '' }}>
                     <span>Enable Multi-Platform Selection Screen for Customers</span>
                 </label>
+                <div class="helper-text">When checked, customers giving a positive rating see choices for Google, TripAdvisor, Yelp, etc.</div>
             </div>
         </div>
 
@@ -324,7 +298,7 @@
             </div>
 
             <div class="form-group">
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 600;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 600; color: var(--text-heading);">
                     <input type="checkbox" name="enable_gamification" value="1" {{ $company?->enable_gamification ? 'checked' : '' }}>
                     <span>Enable Customer Lucky Winner Contest</span>
                 </label>
@@ -334,12 +308,13 @@
             <div class="form-group">
                 <label class="form-label">Winner Interval Threshold (e.g. Every 50th reviewer wins)</label>
                 <input type="number" name="gamification_interval" class="form-control" value="{{ old('gamification_interval', $company?->gamification_interval ?? 50) }}" min="1" max="100000">
-                <div class="helper-text">Example: Entering 50 means every 50th customer scan/review wins a prize! (Tip: Set to 1 for instant testing).</div>
+                <div class="helper-text">Example: Entering 50 means every 50th customer scan/review wins a prize! (Tip: Set to 1 for instant live testing).</div>
             </div>
 
             <div class="form-group">
                 <label class="form-label">Reward / Gift Description</label>
                 <input type="text" name="gamification_reward" class="form-control" value="{{ old('gamification_reward', $company?->gamification_reward ?? 'Free Coffee / Gift Voucher') }}" placeholder="e.g. Free Coffee, 20% Off Voucher, Free Dessert">
+                <div class="helper-text">The gift description rendered on the Lucky Winner claim modal.</div>
             </div>
         </div>
 
@@ -395,7 +370,7 @@
             <button type="submit" class="btn-save" style="background:#475569;">Change Password</button>
         </form>
 
-        <form action="{{ route('logout') }}" method="POST" style="border-top: 1px solid var(--border-color, rgba(255,255,255,0.1)); padding-top: 20px;">
+        <form action="{{ route('logout') }}" method="POST" style="border-top: 1px solid var(--border-color); padding-top: 20px;">
             @csrf
             <button type="submit" class="btn-danger">
                 <span>Logout of Account</span>
@@ -405,8 +380,13 @@
 </div>
 
 <script>
-    function setPrimaryColor(hex) {
-        document.getElementById('primaryColorInput').value = hex;
+    function syncSettingsPrimary(hex) {
+        document.getElementById('settingsPrimaryWheel').value = hex;
+        document.getElementById('settingsPrimaryHex').value = hex;
+    }
+    function syncSettingsSecondary(hex) {
+        document.getElementById('settingsSecondaryWheel').value = hex;
+        document.getElementById('settingsSecondaryHex').value = hex;
     }
 
     function addCustomPlatform() {
@@ -420,19 +400,5 @@
         `;
         container.appendChild(div);
     }
-
-    function toggleThemeMode() {
-        const body = document.body;
-        const currentTheme = body.getAttribute('data-theme') || 'dark';
-        const newTheme = (currentTheme === 'dark') ? 'light' : 'dark';
-        body.setAttribute('data-theme', newTheme);
-        document.getElementById('themeLabel').textContent = (newTheme === 'dark') ? 'Dark Mode' : 'Light Mode';
-        localStorage.setItem('app_theme', newTheme);
-    }
-
-    // Initialize theme from localStorage
-    const savedTheme = localStorage.getItem('app_theme') || 'dark';
-    document.body.setAttribute('data-theme', savedTheme);
-    document.getElementById('themeLabel').textContent = (savedTheme === 'dark') ? 'Dark Mode' : 'Light Mode';
 </script>
 @endsection

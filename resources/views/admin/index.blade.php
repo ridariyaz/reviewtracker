@@ -215,6 +215,27 @@
       </form>
     </div>
   </div>
+  <!-- Interactive Welcome Onboarding Tour Modal Popup -->
+  <div id="welcomeModal" class="modal-backdrop">
+    <div class="modal-box" style="max-width:520px;">
+      <div class="modal-header">
+        <h3 class="modal-title">⚡ Welcome to ReviewTracker!</h3>
+        <button class="modal-close" onclick="dismissWelcomeModal()">✕</button>
+      </div>
+      <div style="font-size:14px; color:var(--text-muted); line-height:1.55; margin-bottom:20px;">
+        ReviewTracker empowers your business to capture 5-star Google Reviews effortlessly in 3 steps:
+        <ol style="margin-top:10px; padding-left:20px; color:var(--text-main);">
+          <li style="margin-bottom:8px;"><strong>Add Team Members:</strong> Click <em>"+ Add Employee"</em> to generate staff QR codes.</li>
+          <li style="margin-bottom:8px;"><strong>Show QR to Customers:</strong> Staff present their QR standee or mobile screen at checkout.</li>
+          <li style="margin-bottom:8px;"><strong>Smart Funnel Routing:</strong> 5-Star reviews go directly to Google Maps; private feedback goes to your inbox!</li>
+        </ol>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <a href="{{ route('help') }}" style="font-size:13px; font-weight:700; color:var(--primary); text-decoration:none;">Read Feature Guide →</a>
+        <button class="btn" onclick="dismissWelcomeModal()">Got it, let's start!</button>
+      </div>
+    </div>
+  </div>
 @endsection
 
 @section('scripts')
@@ -237,5 +258,20 @@
   function closeEditEmployeeModal() {
     document.getElementById('editEmployeeModal').classList.remove('active');
   }
+
+  function dismissWelcomeModal() {
+    localStorage.setItem('reviewtracker_welcome_dismissed', '1');
+    document.getElementById('welcomeModal').classList.remove('active');
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    if (!localStorage.getItem('reviewtracker_welcome_dismissed')) {
+      setTimeout(function () {
+        if (document.getElementById('welcomeModal')) {
+          document.getElementById('welcomeModal').classList.add('active');
+        }
+      }, 400);
+    }
+  });
 </script>
 @endsection
