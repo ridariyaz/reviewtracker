@@ -44,6 +44,32 @@
       font-size: 12px; font-weight: 600; letter-spacing: 0.05em;
       color: #cbd5e1; margin-bottom: 14px; text-transform: uppercase;
     }
+    .winner-banner {
+      background: linear-gradient(135deg, rgba(234, 179, 8, 0.25), rgba(245, 158, 11, 0.15));
+      border: 1px solid rgba(234, 179, 8, 0.5);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 25px rgba(234, 179, 8, 0.2);
+      animation: pulseGlow 2s infinite;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 15px rgba(234, 179, 8, 0.3); }
+      50% { box-shadow: 0 0 30px rgba(234, 179, 8, 0.6); }
+    }
+    .gamification-contest-badge {
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #60a5fa;
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
     h1 { font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 700; margin: 0 0 8px; color: #ffffff; }
     p { margin: 0 0 24px; font-size: 14px; color: #94a3b8; line-height: 1.5; }
     
@@ -76,11 +102,6 @@
       color: #fca5a5;
     }
     .btn-bad:hover { background: rgba(248, 113, 113, 0.22); border-color: #f87171; }
-    
-    .emoji-icon { font-size: 24px; margin-right: 12px; }
-    html[dir="rtl"] .emoji-icon { margin-right: 0; margin-left: 12px; }
-    .arrow-icon { font-size: 18px; opacity: 0.7; }
-    html[dir="rtl"] .arrow-icon { transform: rotate(180deg); }
   </style>
 </head>
 <body>
@@ -90,33 +111,50 @@
       <img src="{{ $brandLogoUrl }}" alt="{{ $brandName }} logo">
     </div>
     @endif
+
     <div class="pill"><span>{{ $brandName }}</span></div>
+
+    @if(!empty($isWinner))
+      <div class="winner-banner">
+        <div style="font-size:1.3rem; font-weight:700; color:#facc15; margin-bottom:4px;">🎉 YOU ARE TODAY'S LUCKY WINNER!</div>
+        <div style="font-size:0.95rem; color:#fff; margin-bottom:8px;">You won: <strong>{{ $gamificationReward ?? 'Special Gift Voucher' }}</strong></div>
+        <div style="background:rgba(0,0,0,0.3); padding:8px 12px; border-radius:8px; font-family:monospace; font-size:1rem; letter-spacing:1px; color:#fde047; display:inline-block;">
+          CLAIM CODE: {{ $winnerCode }}
+        </div>
+      </div>
+    @elseif(!empty($enableGamification))
+      <div class="gamification-contest-badge">
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M20 12v10H4V12"></path><path d="M22 7H2v5h20V7z"></path><path d="M12 22V7"></path><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 1 0-5C13 2 12 7 12 7z"></path></svg>
+        <span>Review Contest: Every {{ $gamificationInterval ?? 50 }}th reviewer wins {{ $gamificationReward ?? 'a gift' }}!</span>
+      </div>
+    @endif
+
     <h1>{{ $txt['headline'] }}</h1>
     <p>{{ $txt['subheadline'] }}</p>
 
     <div class="rating-options">
       <a class="btn-option btn-good" href="{{ route('review.good', $employeeId) }}">
-        <span style="display:flex;align-items:center;">
-          <span class="emoji-icon">😍</span>
+        <span style="display:flex;align-items:center;gap:10px;">
+          <svg viewBox="0 0 24 24" style="width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
           <span>{{ $txt['great'] }}</span>
         </span>
-        <span class="arrow-icon">➔</span>
+        <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
       </a>
 
       <a class="btn-option btn-ok" href="{{ route('review.ok', $employeeId) }}">
-        <span style="display:flex;align-items:center;">
-          <span class="emoji-icon">😊</span>
+        <span style="display:flex;align-items:center;gap:10px;">
+          <svg viewBox="0 0 24 24" style="width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;"><circle cx="12" cy="12" r="10"></circle><line x1="8" y1="15" x2="16" y2="15"></line><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
           <span>{{ $txt['ok'] }}</span>
         </span>
-        <span class="arrow-icon">➔</span>
+        <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
       </a>
 
       <a class="btn-option btn-bad" href="{{ route('review.bad', $employeeId) }}">
-        <span style="display:flex;align-items:center;">
-          <span class="emoji-icon">🙁</span>
+        <span style="display:flex;align-items:center;gap:10px;">
+          <svg viewBox="0 0 24 24" style="width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;"><circle cx="12" cy="12" r="10"></circle><path d="M16 16s-1.5-2-4-2-4 2-4 2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
           <span>{{ $txt['bad'] }}</span>
         </span>
-        <span class="arrow-icon">➔</span>
+        <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
       </a>
     </div>
   </div>

@@ -86,9 +86,18 @@ class EmployeePortalController extends Controller
     public function qr()
     {
         $employee = Auth::guard('employee')->user();
+        $company = $employee->company;
 
         return view('employee.qr', [
+            'employee' => $employee,
             'employeeId' => $employee->id,
+            'brandName' => $company?->name ?? config('app.name'),
+            'brandLogoUrl' => $company?->logo_url,
+            'brandPrimaryColor' => $company?->primary_color ?? '#0d6efd',
+            'brandSecondaryColor' => $company?->secondary_color ?? '#020617',
+            'enableGamification' => (bool) ($company?->enable_gamification),
+            'gamificationInterval' => $company?->gamification_interval ?? 50,
+            'gamificationReward' => $company?->gamification_reward ?? 'Free Coffee / Gift Voucher',
         ]);
     }
 }

@@ -31,6 +31,12 @@ class ReviewController extends Controller
         $lang = $request->query('lang', $company?->language ?? 'en');
         $translations = $langService->getTranslations($lang);
 
+        $totalScans = ScanLog::where('company_id', $employee->company_id)->count();
+        $enableGamification = (bool) ($company?->enable_gamification);
+        $interval = max(1, (int) ($company?->gamification_interval ?? 50));
+        $isWinner = $enableGamification && ($totalScans > 0) && ($totalScans % $interval === 0);
+        $winnerCode = 'WIN-' . strtoupper(substr(md5($employee->id . '-' . $totalScans), 0, 6));
+
         return view('review.feedback', [
             'employeeId' => $employee->id,
             'brandName' => $company?->name ?? config('app.name'),
@@ -38,6 +44,11 @@ class ReviewController extends Controller
             'brandPrimaryColor' => $company?->primary_color ?? '#0d6efd',
             'brandSecondaryColor' => $company?->secondary_color ?? '#020617',
             'txt' => $translations,
+            'enableGamification' => $enableGamification,
+            'gamificationInterval' => $interval,
+            'gamificationReward' => $company?->gamification_reward ?? 'Free Coffee / Voucher',
+            'isWinner' => $isWinner,
+            'winnerCode' => $winnerCode,
         ]);
     }
 
@@ -70,6 +81,12 @@ class ReviewController extends Controller
             'status' => 'new',
         ]);
 
+        $totalScans = ScanLog::where('company_id', $employee->company_id)->count();
+        $enableGamification = (bool) ($company?->enable_gamification);
+        $interval = max(1, (int) ($company?->gamification_interval ?? 50));
+        $isWinner = $enableGamification && ($totalScans > 0) && ($totalScans % $interval === 0);
+        $winnerCode = 'WIN-' . strtoupper(substr(md5($employee->id . '-' . $totalScans), 0, 6));
+
         return view('review.good', [
             'employee' => $employee,
             'brandName' => $company->name,
@@ -79,6 +96,10 @@ class ReviewController extends Controller
             'googleReviewUrl' => $googleUrl,
             'industry' => $company->industry ?? '',
             'keywords' => $company->keywords ?? '',
+            'enableGamification' => $enableGamification,
+            'gamificationReward' => $company?->gamification_reward ?? 'Free Coffee / Voucher',
+            'isWinner' => $isWinner,
+            'winnerCode' => $winnerCode,
         ]);
     }
 

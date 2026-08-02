@@ -27,12 +27,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'industry',
     'keywords',
     'default_platform',
+    'enable_gamification',
+    'gamification_interval',
+    'gamification_reward',
 ])]
 class Company extends Model
 {
     protected $casts = [
         'custom_links' => 'array',
         'enable_multi_review_prompt' => 'boolean',
+        'enable_gamification' => 'boolean',
+        'gamification_interval' => 'integer',
     ];
 
     /** Returns array of active review platform links for multi-destination selection if enabled. */

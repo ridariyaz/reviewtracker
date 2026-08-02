@@ -316,6 +316,33 @@
             </div>
         </div>
 
+        <!-- Section 3.5: Customer Gamification & Reward Lottery -->
+        <div class="settings-card">
+            <div class="card-section-title">
+                <svg viewBox="0 0 24 24"><path d="M20 12v10H4V12"></path><path d="M22 7H2v5h20V7z"></path><path d="M12 22V7"></path><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+                <span>3.5 Customer Review Gamification & Reward Lottery</span>
+            </div>
+
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 600;">
+                    <input type="checkbox" name="enable_gamification" value="1" {{ $company?->enable_gamification ? 'checked' : '' }}>
+                    <span>Enable Customer Lucky Winner Contest</span>
+                </label>
+                <div class="helper-text">When enabled, customers see a gamified reward contest banner, and threshold reviewers trigger an instant Prize Winner card.</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Winner Interval Threshold (e.g. Every 50th reviewer wins)</label>
+                <input type="number" name="gamification_interval" class="form-control" value="{{ old('gamification_interval', $company?->gamification_interval ?? 50) }}" min="1" max="100000">
+                <div class="helper-text">Example: Entering 50 means every 50th customer scan/review wins a prize! (Tip: Set to 1 for instant testing).</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Reward / Gift Description</label>
+                <input type="text" name="gamification_reward" class="form-control" value="{{ old('gamification_reward', $company?->gamification_reward ?? 'Free Coffee / Gift Voucher') }}" placeholder="e.g. Free Coffee, 20% Off Voucher, Free Dessert">
+            </div>
+        </div>
+
         <!-- Section 4: Universal Default Language Settings -->
         <div class="settings-card">
             <div class="card-section-title">

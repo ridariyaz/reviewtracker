@@ -65,6 +65,9 @@ class SettingsController extends Controller
             'custom_link_url' => ['nullable', 'array'],
             'custom_link_url.*' => ['nullable', 'url', 'max:2048'],
             'enable_multi_review_prompt' => ['nullable', 'boolean'],
+            'enable_gamification' => ['nullable', 'boolean'],
+            'gamification_interval' => ['nullable', 'integer', 'min:1', 'max:100000'],
+            'gamification_reward' => ['nullable', 'string', 'max:255'],
         ]);
 
         $logoResult = $logos->saveAndExtractColors(
@@ -97,6 +100,9 @@ class SettingsController extends Controller
             'default_platform' => $data['default_platform'] ?? 'google',
             'custom_links' => $customLinks,
             'enable_multi_review_prompt' => $request->has('enable_multi_review_prompt'),
+            'enable_gamification' => $request->has('enable_gamification'),
+            'gamification_interval' => $data['gamification_interval'] ?? 50,
+            'gamification_reward' => $data['gamification_reward'] ?? 'Free Coffee / Gift Voucher',
         ]);
 
         return redirect()->back()->with('success_pref', 'Settings updated successfully.');

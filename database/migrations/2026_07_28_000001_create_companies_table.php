@@ -19,6 +19,9 @@ return new class extends Migration
             $table->string('industry')->nullable();
             $table->text('keywords')->nullable();
             $table->string('default_platform')->default('google');
+            $table->boolean('enable_gamification')->default(false);
+            $table->integer('gamification_interval')->default(50);
+            $table->string('gamification_reward')->default('Free Coffee / Gift Voucher');
             $table->timestamps();
         });
     }
