@@ -52,6 +52,10 @@ Route::middleware('admin')->group(function () {
     Route::post('/setup', [SetupController::class, 'store'])->name('setup.store');
     Route::get('/help', [HelpController::class, 'show'])->name('help');
 
+    Route::get('/settings', [\App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
+    Route::post('/settings/company', [\App\Http\Controllers\SettingsController::class, 'updateCompany'])->name('settings.company');
+    Route::post('/settings/password', [\App\Http\Controllers\SettingsController::class, 'updatePassword'])->name('settings.password');
+
     // Blocked until company has a valid Google review URL
     Route::middleware('company.configured')->group(function () {
         Route::get('/admin', [AdminController::class, 'index'])->name('admin');
@@ -73,10 +77,6 @@ Route::middleware('admin')->group(function () {
         Route::get('/export/feedback.csv', [FeedbackController::class, 'exportFeedback'])->name('export.feedback');
 
         Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
-
-        Route::get('/settings', [\App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
-        Route::post('/settings/password', [\App\Http\Controllers\SettingsController::class, 'updatePassword'])->name('settings.password');
-        Route::post('/settings/preferences', [\App\Http\Controllers\SettingsController::class, 'updatePreferences'])->name('settings.preferences');
     });
 });
 

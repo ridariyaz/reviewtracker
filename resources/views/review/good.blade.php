@@ -9,11 +9,7 @@
             --primary: {{ $brandPrimaryColor }};
             --secondary: {{ $brandSecondaryColor }};
         }
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: var(--secondary);
@@ -172,48 +168,23 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+            transition: transform 0.15s ease, opacity 0.15s ease;
         }
-        .btn:active {
-            transform: scale(0.98);
-        }
-        .btn-primary {
-            background: var(--primary);
-            color: #ffffff;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-        }
-        .btn-primary:hover {
-            opacity: 0.92;
-        }
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: #e2e8f0;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.18);
-        }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background: var(--primary); color: #ffffff; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); }
+        .btn-primary:hover { opacity: 0.92; }
+        .btn-secondary { background: rgba(255, 255, 255, 0.1); color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.15); }
+        .btn-secondary:hover { background: rgba(255, 255, 255, 0.18); }
         .toast {
-            position: fixed;
-            bottom: 24px;
-            left: 50%;
+            position: fixed; bottom: 24px; left: 50%;
             transform: translateX(-50%) translateY(100px);
-            background: #10b981;
-            color: #ffffff;
-            padding: 12px 24px;
-            border-radius: 30px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-            opacity: 0;
+            background: #10b981; color: #ffffff; padding: 12px 24px;
+            border-radius: 30px; font-weight: 600; font-size: 0.95rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); opacity: 0;
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            pointer-events: none;
-            z-index: 1000;
+            pointer-events: none; z-index: 1000;
         }
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
     </style>
 </head>
 <body>
@@ -224,7 +195,8 @@
 
         <div class="badge-row">
             <div class="badge">
-                <span>✨</span> Great Experience
+                <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                <span>Great Experience</span>
             </div>
             <div class="star-badge">★★★★★</div>
         </div>
@@ -237,10 +209,12 @@
                 <span class="review-label">Suggested Review</span>
                 <div class="header-actions">
                     <button type="button" class="btn-inline-copy" onclick="copyOnlyText()">
-                        <span>📋</span> Copy
+                        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        <span>Copy</span>
                     </button>
                     <button type="button" class="btn-regenerate" id="regenerateBtn" onclick="generateNewReview()">
-                        <span>✨</span> Generate Another
+                        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                        <span>Generate Another</span>
                     </button>
                 </div>
             </div>
@@ -249,10 +223,12 @@
 
         <div class="actions">
             <button type="button" class="btn btn-primary" onclick="useSuggestedReview()">
-                <span>📋</span> Copy Review & Open Google
+                <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                <span>Copy Review & Open Google</span>
             </button>
             <a href="{{ $googleReviewUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
-                Write My Own Review on Google &rarr;
+                <span>Write My Own Review on Google</span>
+                <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
             </a>
         </div>
     </div>
@@ -263,8 +239,11 @@
         const employeeName = @json($employee->name ?? 'the staff');
         const companyName = @json($brandName);
         const googleReviewUrl = @json($googleReviewUrl);
+        const industry = @json($industry ?? '');
+        const rawKeywords = @json($keywords ?? '');
 
-        // Realistic, natural, human customer review sentences with Local SEO keywords
+        const customKeywordsList = rawKeywords ? rawKeywords.split(',').map(k => k.trim()).filter(Boolean) : [];
+
         const openings = [
             `Popped into ${companyName} today and ${employeeName} helped me out right away.`,
             `Had a really smooth experience at ${companyName} thanks to ${employeeName}.`,
@@ -273,27 +252,33 @@
             `Visited ${companyName} and had a great experience with ${employeeName}.`,
             `If you're heading to ${companyName}, definitely ask for ${employeeName}.`,
             `Just left ${companyName} and wanted to leave a quick shoutout for ${employeeName}.`,
-            `Great experience buying from ${companyName} today. ${employeeName} was super helpful.`
+            `Great experience at ${companyName} today. ${employeeName} was super helpful.`
         ];
 
         const details = [
             `They answered all my questions patiently and helped me pick the best option without being pushy.`,
             `The store was clean, well organized, and the prices here are super fair.`,
             `Super knowledgeable, gave me honest recommendations, and got everything sorted in under 5 minutes.`,
-            `They have a great selection of top quality products at reasonable prices.`,
+            `They have a great selection of top quality options at reasonable prices.`,
             `Quick checkout, fair pricing, and really attentive staff.`,
             `They listened to what I needed, saved me time, and made sure I got top quality.`,
-            `Very polite, efficient, and made the whole process quick and easy.`,
-            `They really know their stuff and gave me honest advice on what to get.`
+            `Very polite, efficient, and made the whole process quick and easy.`
         ];
 
+        if (customKeywordsList.length > 0) {
+            customKeywordsList.forEach(kw => {
+                details.push(`Special thanks for the ${kw} — really appreciated the attention to detail!`);
+                details.push(`I was impressed by the ${kw} and how smooth everything was.`);
+            });
+        }
+
         const closings = [
-            `Definitely my new go-to local shop. Highly recommend!`,
+            `Definitely my new go-to local spot. Highly recommend!`,
             `Awesome customer service and fair prices — 5 stars!`,
             `Easily the best customer service in the area. Will definitely be back!`,
-            `Clean store, fast service, and great prices. Highly recommended!`,
+            `Clean environment, fast service, and great prices. Highly recommended!`,
             `Top-notch service from start to finish. I'll be returning for sure!`,
-            `Great local store with fantastic staff. 10/10!`
+            `Great local business with fantastic staff. 10/10!`
         ];
 
         const seenReviews = new Set();
@@ -328,9 +313,7 @@
             const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
+            setTimeout(() => { toast.classList.remove('show'); }, 3000);
         }
 
         function copyOnlyText() {
@@ -347,7 +330,6 @@
 
         function useSuggestedReview() {
             const text = document.getElementById('reviewText').value;
-            
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text);
             } else {
@@ -357,7 +339,6 @@
             }
 
             showToast('Copied! Navigating to Google Reviews...');
-
             const win = window.open(googleReviewUrl, '_blank');
             if (!win) {
                 window.location.href = googleReviewUrl;

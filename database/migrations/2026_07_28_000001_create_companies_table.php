@@ -16,6 +16,9 @@ return new class extends Migration
             $table->string('primary_color')->default('#0d6efd');
             $table->string('secondary_color')->default('#111827');
             $table->string('google_review_url')->nullable();
+            $table->string('industry')->nullable();
+            $table->text('keywords')->nullable();
+            $table->string('default_platform')->default('google');
             $table->timestamps();
         });
     }

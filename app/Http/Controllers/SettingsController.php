@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\CompanyContext;
+use App\Services\LogoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -20,12 +21,85 @@ class SettingsController extends Controller
             'company' => $company,
             'brandName' => $company?->name ?? config('app.name'),
             'languages' => [
-                'en' => ['name' => 'English', 'dir' => 'ltr', 'flag' => '🇺🇸'],
+                'en' => ['name' => 'English', 'dir' => 'ltr', 'flag' => '🇬🇧'],
                 'ml' => ['name' => 'Malayalam (മലയാളം)', 'dir' => 'ltr', 'flag' => '🇮🇳'],
+                'ar' => ['name' => 'Arabic (العربية)', 'dir' => 'rtl', 'flag' => '🇸🇦'],
                 'hi' => ['name' => 'Hindi (हिंदी)', 'dir' => 'ltr', 'flag' => '🇮🇳'],
-                'ar' => ['name' => 'Arabic (العربية)', 'dir' => 'rtl', 'flag' => '🇦🇪'],
+                'bn' => ['name' => 'Bengali / Bangladeshi (বাংলা)', 'dir' => 'ltr', 'flag' => '🇧🇩'],
+            ],
+            'industries' => [
+                'Retail & E-commerce',
+                'Restaurant & Cafe',
+                'Medical & Dental Clinic',
+                'Electronics & Computers',
+                'Automotive & Repair Shop',
+                'Salon, Spa & Beauty',
+                'Real Estate & Property',
+                'Professional Services',
+                'Other',
             ],
         ]);
+    }
+
+    public function updateCompany(Request $request, CompanyContext $companies, LogoService $logos)
+    {
+        $user = Auth::user();
+        $company = $companies->currentFor($user);
+
+        if (! $company) {
+            return redirect()->back()->withErrors(['company' => 'No active company found.']);
+        }
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'logo_file' => ['nullable', 'image', 'max:4096'],
+            'primary_color' => ['nullable', 'string', 'max:20'],
+            'secondary_color' => ['nullable', 'string', 'max:20'],
+            'google_review_url' => ['nullable', 'url', 'max:2048'],
+            'industry' => ['nullable', 'string', 'max:255'],
+            'keywords' => ['nullable', 'string', 'max:1000'],
+            'language' => ['required', 'in:en,ml,ar,hi,bn'],
+            'default_platform' => ['nullable', 'string', 'max:100'],
+            'custom_link_name' => ['nullable', 'array'],
+            'custom_link_name.*' => ['nullable', 'string', 'max:255'],
+            'custom_link_url' => ['nullable', 'array'],
+            'custom_link_url.*' => ['nullable', 'url', 'max:2048'],
+            'enable_multi_review_prompt' => ['nullable', 'boolean'],
+        ]);
+
+        $logoResult = $logos->saveAndExtractColors(
+            $request->file('logo_file'),
+            $company->id
+        );
+
+        $customLinks = [];
+        if (isset($data['custom_link_name']) && is_array($data['custom_link_name'])) {
+            foreach ($data['custom_link_name'] as $index => $linkName) {
+                $url = $data['custom_link_url'][$index] ?? null;
+                if (! empty($linkName) && ! empty($url)) {
+                    $customLinks[] = [
+                        'name' => trim($linkName),
+                        'url' => trim($url),
+                    ];
+                }
+            }
+        }
+
+        $company->update([
+            'name' => $data['name'],
+            'logo_url' => $logoResult['logo_url'] ?: $company->logo_url,
+            'primary_color' => $data['primary_color'] ?: ($logoResult['primary_hex'] ?: $company->primary_color),
+            'secondary_color' => $data['secondary_color'] ?: ($logoResult['secondary_hex'] ?: $company->secondary_color),
+            'google_review_url' => $data['google_review_url'] ?? null,
+            'industry' => $data['industry'] ?? null,
+            'keywords' => $data['keywords'] ?? null,
+            'language' => $data['language'],
+            'default_platform' => $data['default_platform'] ?? 'google',
+            'custom_links' => $customLinks,
+            'enable_multi_review_prompt' => $request->has('enable_multi_review_prompt'),
+        ]);
+
+        return redirect()->back()->with('success_pref', 'Settings updated successfully.');
     }
 
     public function updatePassword(Request $request)
@@ -48,47 +122,5 @@ class SettingsController extends Controller
         ]);
 
         return redirect()->back()->with('success_password', 'Password updated successfully.');
-    }
-
-    public function updatePreferences(Request $request, CompanyContext $companies)
-    {
-        $user = Auth::user();
-        $company = $companies->currentFor($user);
-
-        if (! $company) {
-            return redirect()->back()->withErrors(['company' => 'No active company found.']);
-        }
-
-        $data = $request->validate([
-            'language' => ['required', 'in:en,ml,hi,ar'],
-            'notification_email' => ['nullable', 'email', 'max:255'],
-            'enable_multi_review_prompt' => ['nullable', 'boolean'],
-            'custom_link_name' => ['nullable', 'array'],
-            'custom_link_name.*' => ['nullable', 'string', 'max:255'],
-            'custom_link_url' => ['nullable', 'array'],
-            'custom_link_url.*' => ['nullable', 'url', 'max:2048'],
-        ]);
-
-        $customLinks = [];
-        if (isset($data['custom_link_name']) && is_array($data['custom_link_name'])) {
-            foreach ($data['custom_link_name'] as $index => $name) {
-                $url = $data['custom_link_url'][$index] ?? null;
-                if (! empty($name) && ! empty($url)) {
-                    $customLinks[] = [
-                        'name' => trim($name),
-                        'url' => trim($url),
-                    ];
-                }
-            }
-        }
-
-        $company->update([
-            'language' => $data['language'],
-            'notification_email' => $data['notification_email'] ?? null,
-            'enable_multi_review_prompt' => $request->has('enable_multi_review_prompt'),
-            'custom_links' => $customLinks,
-        ]);
-
-        return redirect()->back()->with('success_pref', 'Settings saved successfully.');
     }
 }

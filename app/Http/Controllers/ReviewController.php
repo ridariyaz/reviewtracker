@@ -28,7 +28,8 @@ class ReviewController extends Controller
             'device_type' => $this->detectDeviceType($request->userAgent()),
         ]);
 
-        $translations = $langService->getTranslations($company?->language);
+        $lang = $request->query('lang', $company?->language ?? 'en');
+        $translations = $langService->getTranslations($lang);
 
         return view('review.feedback', [
             'employeeId' => $employee->id,
@@ -47,7 +48,16 @@ class ReviewController extends Controller
     public function good(Employee $employee, \App\Services\LanguageService $langService)
     {
         $company = $employee->company;
-        $googleUrl = $company?->google_review_url ?: 'https://google.com';
+
+        if (! $company || ! $company->hasValidGoogleReviewUrl()) {
+            return view('review.no_link', [
+                'brandName' => $company?->name ?? config('app.name'),
+                'brandPrimaryColor' => $company?->primary_color ?? '#0d6efd',
+                'brandSecondaryColor' => $company?->secondary_color ?? '#020617',
+            ]);
+        }
+
+        $googleUrl = $company->google_review_url;
 
         $employee->increment('scans');
         $employee->increment('good_count');
@@ -62,11 +72,13 @@ class ReviewController extends Controller
 
         return view('review.good', [
             'employee' => $employee,
-            'brandName' => $company?->name ?? config('app.name'),
-            'brandLogoUrl' => $company?->logo_url,
-            'brandPrimaryColor' => $company?->primary_color ?? '#0d6efd',
-            'brandSecondaryColor' => $company?->secondary_color ?? '#020617',
+            'brandName' => $company->name,
+            'brandLogoUrl' => $company->logo_url,
+            'brandPrimaryColor' => $company->primary_color ?? '#0d6efd',
+            'brandSecondaryColor' => $company->secondary_color ?? '#020617',
             'googleReviewUrl' => $googleUrl,
+            'industry' => $company->industry ?? '',
+            'keywords' => $company->keywords ?? '',
         ]);
     }
 

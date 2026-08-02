@@ -7,16 +7,22 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Saves company logo uploads and optionally extracts dominant brand colors.
- *
- * @return array{0: ?string, 1: ?string, 2: ?string} [logo_url, primary_hex, secondary_hex]
+ * Saves company logo uploads and extracts dominant brand color swatches.
  */
 class LogoService
 {
+    /**
+     * @return array{logo_url: ?string, primary_hex: ?string, secondary_hex: ?string, palette: array<string>}
+     */
     public function saveAndExtractColors(?UploadedFile $file, int $companyId): array
     {
         if (! $file) {
-            return [null, null, null];
+            return [
+                'logo_url' => null,
+                'primary_hex' => null,
+                'secondary_hex' => null,
+                'palette' => [],
+            ];
         }
 
         $ext = strtolower($file->getClientOriginalExtension() ?: 'png');
@@ -25,25 +31,55 @@ class LogoService
         $fullPath = Storage::disk('public')->path($path);
         $logoUrl = Storage::disk('public')->url($path);
 
+        $paletteHex = [];
+
         try {
             $thief = new ColorThief(quality: 3);
             $dominant = $thief->getColor($fullPath);
-            $palette = $thief->getPalette($fullPath, 3);
-            $secondary = ($palette->count() > 1) ? $palette[1] : $dominant;
+            $palette = $thief->getPalette($fullPath, 6);
 
-            if (! $dominant) {
-                return [$logoUrl, null, null];
+            if ($palette) {
+                foreach ($palette as $color) {
+                    $hex = $this->rgbToHex($color->red(), $color->green(), $color->blue());
+                    if (! in_array($hex, $paletteHex, true)) {
+                        $paletteHex[] = $hex;
+                    }
+                }
             }
 
+            $primary = $dominant ? $this->rgbToHex($dominant->red(), $dominant->green(), $dominant->blue()) : '#0d6efd';
+            $secondary = (count($paletteHex) > 1) ? $paletteHex[1] : '#020617';
+
             return [
-                $logoUrl,
-                $this->rgbToHex($dominant->red(), $dominant->green(), $dominant->blue()),
-                $secondary
-                    ? $this->rgbToHex($secondary->red(), $secondary->green(), $secondary->blue())
-                    : null,
+                'logo_url' => $logoUrl,
+                'primary_hex' => $primary,
+                'secondary_hex' => $secondary,
+                'palette' => $paletteHex,
             ];
         } catch (\Throwable) {
-            return [$logoUrl, null, null];
+            return [
+                'logo_url' => $logoUrl,
+                'primary_hex' => '#0d6efd',
+                'secondary_hex' => '#020617',
+                'palette' => ['#0d6efd', '#2563eb', '#1e40af', '#020617', '#0f172a', '#1e293b'],
+            ];
+        }
+    }
+
+    public function extractPaletteFromImagePath(string $fullPath): array
+    {
+        try {
+            $thief = new ColorThief(quality: 3);
+            $palette = $thief->getPalette($fullPath, 6);
+            $hexList = [];
+            if ($palette) {
+                foreach ($palette as $color) {
+                    $hexList[] = $this->rgbToHex($color->red(), $color->green(), $color->blue());
+                }
+            }
+            return $hexList;
+        } catch (\Throwable) {
+            return ['#0d6efd', '#2563eb', '#1e40af', '#020617', '#0f172a', '#1e293b'];
         }
     }
 

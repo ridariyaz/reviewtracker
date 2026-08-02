@@ -20,13 +20,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'primary_color',
     'secondary_color',
     'google_review_url',
-    'tripadvisor_review_url',
-    'yelp_review_url',
-    'trustpilot_review_url',
     'custom_links',
     'language',
     'enable_multi_review_prompt',
     'notification_email',
+    'industry',
+    'keywords',
+    'default_platform',
 ])]
 class Company extends Model
 {
