@@ -38,8 +38,21 @@
     h1 { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 700; margin: 0 0 8px; color: #ffffff; }
     p { margin: 0 0 20px; font-size: 14px; color: #94a3b8; line-height: 1.5; }
     
+    .chip-section-title {
+      font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+      color: rgba(255, 255, 255, 0.6); margin-bottom: 12px; text-align: left;
+    }
+    .chips-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .chip {
+      background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #e2e8f0; padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 600;
+      cursor: pointer; user-select: none; transition: all 0.2s ease; display: flex; align-items: center; gap: 6px;
+    }
+    .chip:hover { background: rgba(255, 255, 255, 0.15); }
+    .chip.selected { background: {{ $brandPrimaryColor }}; border-color: {{ $brandPrimaryColor }}; color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
+
     textarea {
-      width: 100%; min-height: 130px; padding: 14px; border-radius: 16px;
+      width: 100%; min-height: 110px; padding: 14px; border-radius: 16px;
       border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(2, 6, 23, 0.8);
       color: #f8fafc; font-family: inherit; font-size: 14px; resize: vertical;
       transition: all 0.2s ease; outline: none;
@@ -65,13 +78,56 @@
     @endif
     <h1>{{ $txt['improve_title'] }}</h1>
     <p>{{ $txt['improve_sub'] }}</p>
+
     <form action="{{ route('review.submit') }}" method="POST">
       @csrf
       <input type="hidden" name="employee_id" value="{{ $employeeId }}">
       <input type="hidden" name="rating" value="{{ $rating }}">
-      <textarea name="comment" placeholder="{{ $txt['placeholder'] }}"></textarea>
+
+      <div class="chip-section-title">Select Issue (1-Tap Select)</div>
+      <div class="chips-grid">
+        <div class="chip" data-issue="Long Wait Time" onclick="toggleChip(this)"><span>⏱️</span> Wait Time</div>
+        <div class="chip" data-issue="Communication" onclick="toggleChip(this)"><span>💬</span> Communication</div>
+        <div class="chip" data-issue="Pricing / Value" onclick="toggleChip(this)"><span>💵</span> Pricing</div>
+        <div class="chip" data-issue="Item Out of Stock" onclick="toggleChip(this)"><span>📦</span> Stock</div>
+        <div class="chip" data-issue="Cleanliness" onclick="toggleChip(this)"><span>🧹</span> Cleanliness</div>
+        <div class="chip" data-issue="Other" onclick="toggleChip(this)"><span>😕</span> Other</div>
+      </div>
+
+      <textarea name="comment" id="commentBox" placeholder="{{ $txt['placeholder'] }}"></textarea>
       <button type="submit">{{ $txt['submit'] }}</button>
     </form>
   </div>
+
+  <script>
+    const selectedIssues = new Set();
+    function toggleChip(element) {
+        const issue = element.getAttribute('data-issue');
+        if (selectedIssues.has(issue)) {
+            selectedIssues.delete(issue);
+            element.classList.remove('selected');
+        } else {
+            selectedIssues.add(issue);
+            element.classList.add('selected');
+        }
+        updateCommentField();
+    }
+    function updateCommentField() {
+        const commentBox = document.getElementById('commentBox');
+        let currentText = commentBox.value;
+        if (currentText.startsWith('[Issue: ')) {
+            const endBracketIndex = currentText.indexOf(']\n');
+            if (endBracketIndex !== -1) {
+                currentText = currentText.substring(endBracketIndex + 2);
+            }
+        }
+        if (selectedIssues.size > 0) {
+            const issuesText = Array.from(selectedIssues).join(', ');
+            commentBox.value = `[Issue: ${issuesText}]\n${currentText.trim()}`;
+        } else {
+            commentBox.value = currentText.trim();
+        }
+    }
+  </script>
 </body>
 </html>
