@@ -84,8 +84,16 @@ class ReviewController extends Controller
         $totalScans = ScanLog::where('company_id', $employee->company_id)->count();
         $enableGamification = (bool) ($company?->enable_gamification);
         $interval = max(1, (int) ($company?->gamification_interval ?? 50));
-        $isWinner = $enableGamification && ($totalScans > 0) && ($totalScans % $interval === 0);
-        $winnerCode = 'WIN-' . strtoupper(substr(md5($employee->id . '-' . $totalScans), 0, 6));
+        
+        $forcedWin = (bool) ($employee->force_next_win);
+        $thresholdWin = $enableGamification && ($totalScans > 0) && ($totalScans % $interval === 0);
+        $isWinner = $forcedWin || $thresholdWin;
+
+        if ($forcedWin) {
+            $employee->update(['force_next_win' => false]);
+        }
+
+        $winnerCode = 'WIN-' . strtoupper(substr(md5($employee->id . '-' . $totalScans . '-' . time()), 0, 6));
 
         return view('review.good', [
             'employee' => $employee,
@@ -96,8 +104,9 @@ class ReviewController extends Controller
             'googleReviewUrl' => $googleUrl,
             'industry' => $company->industry ?? '',
             'keywords' => $company->keywords ?? '',
-            'enableGamification' => $enableGamification,
-            'gamificationReward' => $company?->gamification_reward ?? 'Free Coffee / Voucher',
+            'enableGamification' => $enableGamification || $forcedWin,
+            'gamificationReward' => $company?->gamification_reward ?? 'Free Gift / Voucher',
+            'gamificationImageUrl' => $company?->gamification_image_url,
             'isWinner' => $isWinner,
             'winnerCode' => $winnerCode,
         ]);

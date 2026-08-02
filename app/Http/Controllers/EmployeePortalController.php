@@ -100,4 +100,15 @@ class EmployeePortalController extends Controller
             'gamificationReward' => $company?->gamification_reward ?? 'Free Coffee / Gift Voucher',
         ]);
     }
+
+    public function toggleForceWin(Request $request)
+    {
+        /** @var Employee $employee */
+        $employee = Auth::guard('employee')->user();
+        $employee->update([
+            'force_next_win' => true,
+        ]);
+
+        return redirect()->back()->with('success', '🎁 Next customer scan is GUARANTEED to win the reward prize!');
+    }
 }

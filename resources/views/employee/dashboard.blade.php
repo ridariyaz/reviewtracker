@@ -132,7 +132,24 @@
               <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
               <span>Fullscreen View</span>
             </a>
+
+            <form action="{{ route('employee.force_win') }}" method="POST" style="margin:0; display:inline-block;">
+              @csrf
+              <button type="submit" class="btn" style="background:#f59e0b; color:#000; font-weight:800;">
+                <span>🎁 Make Next Scan Win!</span>
+              </button>
+            </form>
           </div>
+
+          @if(session('success'))
+            <div style="margin-top:10px; padding:8px 12px; background:rgba(245,158,11,0.15); border:1px solid #f59e0b; color:#facc15; border-radius:8px; font-size:12px; font-weight:700;">
+              {{ session('success') }}
+            </div>
+          @elseif($employee->force_next_win)
+            <div style="margin-top:10px; padding:8px 12px; background:rgba(245,158,11,0.15); border:1px solid #f59e0b; color:#facc15; border-radius:8px; font-size:12px; font-weight:700;">
+              ✨ Next customer scan is GUARANTEED to win the reward prize!
+            </div>
+          @endif
         </div>
       </div>
     </div>

@@ -84,6 +84,7 @@ Route::middleware('admin')->group(function () {
 Route::middleware('employee')->group(function () {
     Route::get('/employee/dashboard', [EmployeePortalController::class, 'dashboard'])->name('employee.dashboard');
     Route::get('/employee/qr', [EmployeePortalController::class, 'qr'])->name('employee.qr');
+    Route::post('/employee/force_win', [EmployeePortalController::class, 'toggleForceWin'])->name('employee.force_win');
 });
 
 // --- Public customer review funnel (QR landing with rate-limiting protection) ---

@@ -214,6 +214,13 @@
       <span>Back</span>
     </a>
 
+    <form action="{{ route('employee.force_win') }}" method="POST" style="margin:0; display:inline-block;">
+      @csrf
+      <button type="submit" class="action-btn" style="background:#f59e0b; color:#000; font-weight:800; border:none;">
+        <span>🎁 Make Next Scan Win!</span>
+      </button>
+    </form>
+
     <button type="button" class="action-btn btn-print" onclick="window.print()">
       <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
       <span>Print / Download Standee</span>

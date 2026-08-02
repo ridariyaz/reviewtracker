@@ -24,6 +24,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
     'bad_count',
     'employee_username',
     'employee_password',
+    'force_next_win',
 ])]
 #[Hidden(['employee_password'])]
 class Employee extends Authenticatable
@@ -40,6 +41,7 @@ class Employee extends Authenticatable
     {
         return [
             'employee_password' => 'hashed',
+            'force_next_win' => 'boolean',
         ];
     }
 

@@ -316,6 +316,17 @@
                 <input type="text" name="gamification_reward" class="form-control" value="{{ old('gamification_reward', $company?->gamification_reward ?? 'Free Coffee / Gift Voucher') }}" placeholder="e.g. Free Coffee, 20% Off Voucher, Free Dessert">
                 <div class="helper-text">The gift description rendered on the Lucky Winner claim modal.</div>
             </div>
+
+            <div class="form-group">
+                <label class="form-label">Upload Prize Photo / Gift Coupon Image</label>
+                <input type="file" name="gamification_image_file" class="form-control" accept="image/*">
+                <div class="helper-text">Upload a picture of the gift voucher or prize coupon shown on the winner popup card.</div>
+                @if($company?->gamification_image_url)
+                    <div style="margin-top: 10px;">
+                        <img src="{{ $company->gamification_image_url }}" style="max-height: 90px; border-radius: 8px; border: 1px solid var(--border-color);">
+                    </div>
+                @endif
+            </div>
         </div>
 
         <!-- Section 4: Universal Default Language Settings -->

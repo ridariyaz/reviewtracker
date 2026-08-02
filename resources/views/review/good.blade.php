@@ -185,9 +185,58 @@
             pointer-events: none; z-index: 1000;
         }
         .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        /* Winner Modal */
+        .winner-backdrop {
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px); display: flex; align-items: center;
+            justify-content: center; z-index: 2000; padding: 16px;
+        }
+        .winner-box {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+            border: 2px solid #f59e0b; color: #fff; width: 100%; max-width: 440px;
+            border-radius: 24px; padding: 28px 24px; text-align: center;
+            box-shadow: 0 20px 50px rgba(245, 158, 11, 0.3);
+        }
+        .claim-code-pill {
+            display: inline-block; background: #f59e0b; color: #000;
+            font-weight: 800; font-size: 1.3rem; padding: 8px 20px;
+            border-radius: 999px; letter-spacing: 0.1em; margin: 12px 0 16px;
+        }
     </style>
 </head>
 <body>
+    @if($isWinner)
+    <!-- Winner Screen Popup for 5-Star / Good Customers -->
+    <div id="winnerModal" class="winner-backdrop">
+        <div class="winner-box">
+            <div style="font-size:2.5rem; margin-bottom:8px;">🎉 🎁 🎉</div>
+            <h2 style="font-size:1.6rem; font-weight:800; color:#facc15; margin-bottom:6px;">LUCKY WINNER!</h2>
+            <p style="font-size:0.95rem; opacity:0.9; margin-bottom:12px;">You won a special prize for leaving a review!</p>
+
+            @if(!empty($gamificationImageUrl))
+                <div style="margin-bottom:14px; border-radius:14px; overflow:hidden; border:1px solid rgba(255,255,255,0.2);">
+                    <img src="{{ $gamificationImageUrl }}" alt="Prize photo" style="max-height:180px; width:100%; object-fit:contain; background:#000;">
+                </div>
+            @endif
+
+            <div style="font-size:1.15rem; font-weight:700; color:#ffffff; margin-bottom:4px;">
+                Reward: {{ $gamificationReward }}
+            </div>
+
+            <div class="claim-code-pill">{{ $winnerCode }}</div>
+
+            <p style="font-size:0.82rem; opacity:0.8; margin-bottom:20px;">
+                Show this claim code to your server or cashier to claim your reward gift!
+            </p>
+
+            <button type="button" class="btn" style="background:#f59e0b; color:#000; font-weight:800;" onclick="dismissWinnerModal()">
+                <span>Claim Prize & Write Review →</span>
+            </button>
+        </div>
+    </div>
+    @endif
+
     <div class="card">
         @if($brandLogoUrl)
             <img src="{{ $brandLogoUrl }}" alt="{{ $brandName }}" class="logo">
@@ -236,6 +285,11 @@
     <div id="toast" class="toast">Review copied to clipboard!</div>
 
     <script>
+        function dismissWinnerModal() {
+            const el = document.getElementById('winnerModal');
+            if (el) el.style.display = 'none';
+        }
+
         const employeeName = @json($employee->name ?? 'the staff');
         const companyName = @json($brandName);
         const googleReviewUrl = @json($googleReviewUrl);

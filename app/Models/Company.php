@@ -30,6 +30,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'enable_gamification',
     'gamification_interval',
     'gamification_reward',
+    'gamification_image_url',
 ])]
 class Company extends Model
 {

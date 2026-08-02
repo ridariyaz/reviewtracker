@@ -68,12 +68,19 @@ class SettingsController extends Controller
             'enable_gamification' => ['nullable', 'boolean'],
             'gamification_interval' => ['nullable', 'integer', 'min:1', 'max:100000'],
             'gamification_reward' => ['nullable', 'string', 'max:255'],
+            'gamification_image_file' => ['nullable', 'image', 'max:4096'],
         ]);
 
         $logoResult = $logos->saveAndExtractColors(
             $request->file('logo_file'),
             $company->id
         );
+
+        $gamificationImageUrl = $company->gamification_image_url;
+        if ($request->hasFile('gamification_image_file')) {
+            $path = $request->file('gamification_image_file')->store('gamification', 'public');
+            $gamificationImageUrl = '/storage/'.$path;
+        }
 
         $customLinks = [];
         if (isset($data['custom_link_name']) && is_array($data['custom_link_name'])) {
@@ -103,6 +110,7 @@ class SettingsController extends Controller
             'enable_gamification' => $request->has('enable_gamification'),
             'gamification_interval' => $data['gamification_interval'] ?? 50,
             'gamification_reward' => $data['gamification_reward'] ?? 'Free Coffee / Gift Voucher',
+            'gamification_image_url' => $gamificationImageUrl,
         ]);
 
         return redirect()->back()->with('success_pref', 'Settings updated successfully.');
