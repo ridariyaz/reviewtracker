@@ -60,23 +60,14 @@ class ReviewController extends Controller
             'status' => 'new',
         ]);
 
-        $destinations = $company?->configuredReviewDestinations() ?? [];
-
-        if (count($destinations) > 1) {
-            $translations = $langService->getTranslations($company?->language);
-
-            return view('review.multi_destination', [
-                'employee' => $employee,
-                'destinations' => $destinations,
-                'brandName' => $company?->name ?? config('app.name'),
-                'brandLogoUrl' => $company?->logo_url,
-                'brandPrimaryColor' => $company?->primary_color ?? '#0d6efd',
-                'brandSecondaryColor' => $company?->secondary_color ?? '#020617',
-                'txt' => $translations,
-            ]);
-        }
-
-        return redirect()->away($googleUrl);
+        return view('review.good', [
+            'employee' => $employee,
+            'brandName' => $company?->name ?? config('app.name'),
+            'brandLogoUrl' => $company?->logo_url,
+            'brandPrimaryColor' => $company?->primary_color ?? '#0d6efd',
+            'brandSecondaryColor' => $company?->secondary_color ?? '#020617',
+            'googleReviewUrl' => $googleUrl,
+        ]);
     }
 
     /** Show private feedback form for an "OK" rating. */
