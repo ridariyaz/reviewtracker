@@ -288,6 +288,7 @@
         function dismissWinnerModal() {
             const el = document.getElementById('winnerModal');
             if (el) el.style.display = 'none';
+            openGoogleInstant();
         }
 
         const employeeName = @json($employee->name ?? 'the staff');
@@ -370,33 +371,42 @@
             setTimeout(() => { toast.classList.remove('show'); }, 3000);
         }
 
+        function openGoogleInstant() {
+            if (!googleReviewUrl) return;
+            const win = window.open(googleReviewUrl, '_blank');
+            if (!win || win.closed || typeof win.closed === 'undefined') {
+                window.location.href = googleReviewUrl;
+            }
+        }
+
         function copyOnlyText() {
             const text = document.getElementById('reviewText').value;
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text);
-            } else {
-                const textarea = document.getElementById('reviewText');
-                textarea.select();
-                document.execCommand('copy');
-            }
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text);
+                } else {
+                    const textarea = document.getElementById('reviewText');
+                    textarea.select();
+                    document.execCommand('copy');
+                }
+            } catch (e) {}
             showToast('Review text copied to clipboard!');
         }
 
         function useSuggestedReview() {
             const text = document.getElementById('reviewText').value;
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text);
-            } else {
-                const textarea = document.getElementById('reviewText');
-                textarea.select();
-                document.execCommand('copy');
-            }
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text);
+                } else {
+                    const textarea = document.getElementById('reviewText');
+                    textarea.select();
+                    document.execCommand('copy');
+                }
+            } catch (e) {}
 
-            showToast('Copied! Navigating to Google Reviews...');
-            const win = window.open(googleReviewUrl, '_blank');
-            if (!win) {
-                window.location.href = googleReviewUrl;
-            }
+            showToast('Copied! Opening Google Reviews...');
+            openGoogleInstant();
         }
 
         generateNewReview();
