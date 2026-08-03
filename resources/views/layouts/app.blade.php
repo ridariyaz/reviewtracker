@@ -399,10 +399,22 @@
     </div>
   </div>
 
+  <style>
+    .spotlight-active-target {
+      position: relative !important;
+      z-index: 10001 !important;
+      box-shadow: 0 0 0 3px var(--primary), 0 0 24px rgba(37, 99, 235, 0.45) !important;
+      border-radius: 8px !important;
+      filter: none !important;
+      backdrop-filter: none !important;
+      transition: all 0.25s ease !important;
+    }
+  </style>
+
   <!-- Interactive Spotlight Tour Overlay -->
-  <div id="spotlightTourOverlay" style="display:none; position:fixed; inset:0; z-index:9999; pointer-events:auto;">
-    <div id="spotlightHighlightBox" style="position:absolute; border:3px solid var(--primary); border-radius:12px; box-shadow:0 0 0 9999px rgba(15, 23, 42, 0.75); transition:all 0.3s cubic-bezier(0.16, 1, 0.3, 1); pointer-events:none;"></div>
-    <div id="spotlightTooltipCard" style="position:absolute; background:var(--card-bg); color:var(--text-main); border:1px solid var(--border-color); width:320px; border-radius:16px; padding:20px; box-shadow:0 20px 50px rgba(0,0,0,0.6); transition:all 0.3s ease;">
+  <div id="spotlightTourOverlay" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(15, 23, 42, 0.75); pointer-events:auto;">
+    <div id="spotlightHighlightBox" style="display:none;"></div>
+    <div id="spotlightTooltipCard" style="position:absolute; z-index:10002; background:var(--card-bg); color:var(--text-main); border:1px solid var(--border-color); width:320px; border-radius:16px; padding:20px; box-shadow:0 25px 60px rgba(0,0,0,0.7); transition:all 0.3s ease;">
       <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--primary); font-weight:700; margin-bottom:4px;" id="spotlightStepCounter">Step 1 of 5</div>
       <div style="font-size:1rem; font-weight:800; color:var(--text-heading); margin-bottom:6px;" id="spotlightStepTitle">Welcome Tour</div>
       <div style="font-size:0.88rem; color:var(--text-muted); line-height:1.45; margin-bottom:16px;" id="spotlightStepBody">Description</div>
@@ -453,6 +465,12 @@
 
     let currentTourIndex = 0;
 
+    function clearSpotlightTargetHighlights() {
+      document.querySelectorAll('.spotlight-active-target').forEach(el => {
+        el.classList.remove('spotlight-active-target');
+      });
+    }
+
     function startSpotlightTour() {
       currentTourIndex = 0;
       document.getElementById('spotlightTourOverlay').style.display = 'block';
@@ -460,6 +478,8 @@
     }
 
     function renderSpotlightStep() {
+      clearSpotlightTargetHighlights();
+
       const step = tourSteps[currentTourIndex];
       const targetEl = document.querySelector(step.selector);
       
@@ -470,15 +490,11 @@
       document.getElementById('spotlightPrevBtn').style.display = currentTourIndex === 0 ? 'none' : 'inline-flex';
       document.getElementById('spotlightNextBtn').textContent = currentTourIndex === tourSteps.length - 1 ? 'Finish' : 'Next →';
 
-      const highlightBox = document.getElementById('spotlightHighlightBox');
       const tooltipCard = document.getElementById('spotlightTooltipCard');
 
       if (targetEl) {
+        targetEl.classList.add('spotlight-active-target');
         const rect = targetEl.getBoundingClientRect();
-        highlightBox.style.top = (rect.top - 6) + 'px';
-        highlightBox.style.left = (rect.left - 6) + 'px';
-        highlightBox.style.width = (rect.width + 12) + 'px';
-        highlightBox.style.height = (rect.height + 12) + 'px';
 
         let topPos = rect.bottom + 14;
         if (topPos + 220 > window.innerHeight) {
@@ -492,10 +508,6 @@
         tooltipCard.style.top = Math.max(10, topPos) + 'px';
         tooltipCard.style.left = Math.max(10, leftPos) + 'px';
       } else {
-        highlightBox.style.top = '20%';
-        highlightBox.style.left = '20%';
-        highlightBox.style.width = '60%';
-        highlightBox.style.height = '180px';
         tooltipCard.style.top = '40%';
         tooltipCard.style.left = '30%';
       }
@@ -518,6 +530,7 @@
     }
 
     function closeSpotlightTour() {
+      clearSpotlightTargetHighlights();
       document.getElementById('spotlightTourOverlay').style.display = 'none';
       localStorage.setItem('reviewtracker_tour_done', '1');
     }
