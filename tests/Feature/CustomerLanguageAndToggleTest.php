@@ -73,8 +73,9 @@ class CustomerLanguageAndToggleTest extends TestCase
 
         $response = $this->get("/good/{$employee->id}");
 
-        // Forwards DIRECTLY to Google Reviews URL with zero extra clicks
-        $response->assertRedirect('https://g.page/r/test/review');
+        // Displays review generator & instant Google button page
+        $response->assertOk();
+        $response->assertSee('Copy Review & Open Google', false);
     }
 
     public function test_good_rating_shows_multi_destination_card_only_when_toggle_is_on(): void

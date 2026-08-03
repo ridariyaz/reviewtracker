@@ -101,6 +101,17 @@ class ReviewController extends Controller
 
         $winnerCode = 'WIN-' . strtoupper(substr(md5($employee->id . '-' . $totalScans . '-' . time()), 0, 6));
 
+        if ($company->enable_multi_review_prompt && ! empty($company->custom_links)) {
+            return view('review.multi_destination', [
+                'brandName' => $company->name,
+                'brandLogoUrl' => $company->logo_url,
+                'brandPrimaryColor' => $company->primary_color ?? '#0d6efd',
+                'brandSecondaryColor' => $company->secondary_color ?? '#020617',
+                'googleReviewUrl' => $googleUrl,
+                'destinations' => $company->custom_links ?? [],
+            ]);
+        }
+
         return view('review.good', [
             'employee' => $employee,
             'brandName' => $company->name,

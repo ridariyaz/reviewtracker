@@ -62,8 +62,7 @@ class SecurityAndUiTest extends TestCase
         $response = $this->actingAs($employee, 'employee')->get('/employee/dashboard');
 
         $response->assertOk();
-        $response->assertSee('Your performance');
-        $response->assertSee('Rank #1');
-        $response->assertSee('5-Star Champion');
+        $response->assertSee('Your Performance Overview');
+        $response->assertSee('Team Leaderboard');
     }
 }

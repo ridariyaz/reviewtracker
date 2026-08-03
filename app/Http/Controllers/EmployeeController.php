@@ -7,6 +7,7 @@ use App\Services\CompanyContext;
 use App\Services\QrCodeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 /**
  * Admin CRUD for employees under the active company.
@@ -32,7 +33,7 @@ class EmployeeController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'employee_username' => ['nullable', 'string', 'max:255'],
+            'employee_username' => ['nullable', 'string', 'max:255', Rule::unique('employees', 'employee_username')],
             'employee_password' => ['nullable', 'string', 'min:8'],
         ]);
 
@@ -40,7 +41,7 @@ class EmployeeController extends Controller
         
         $employeeData = ['name' => $data['name']];
         if (! empty($data['employee_username'])) {
-            $employeeData['employee_username'] = $data['employee_username'];
+            $employeeData['employee_username'] = trim($data['employee_username']);
         }
         if (! empty($data['employee_password'])) {
             $employeeData['employee_password'] = $data['employee_password'];
@@ -76,12 +77,12 @@ class EmployeeController extends Controller
         $this->authorizeEmployee($employee, $companies);
 
         $data = $request->validate([
-            'employee_username' => ['required', 'string', 'max:255'],
+            'employee_username' => ['required', 'string', 'max:255', Rule::unique('employees', 'employee_username')->ignore($employee->id)],
             'employee_password' => ['required', 'string', 'min:8'],
         ]);
 
         $employee->update([
-            'employee_username' => $data['employee_username'],
+            'employee_username' => trim($data['employee_username']),
             'employee_password' => $data['employee_password'],
         ]);
 

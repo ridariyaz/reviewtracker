@@ -21,7 +21,7 @@ class UiWorkflowTest extends TestCase
             'google_review_url' => 'https://g.page/r/test/review',
         ]);
 
-        $response = $this->actingAs($user)->post('/add_employee', [
+        $response = $this->actingAs($user)->withSession(['company_id' => $company->id])->post('/add_employee', [
             'name' => 'John Wick',
             'employee_username' => 'johnwick',
             'employee_password' => 'secret123',

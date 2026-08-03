@@ -101,8 +101,8 @@ class SettingsController extends Controller
         $company->update([
             'name' => $data['name'],
             'logo_url' => $logoResult['logo_url'] ?: $company->logo_url,
-            'primary_color' => $data['primary_color'] ?: ($logoResult['primary_hex'] ?: $company->primary_color),
-            'secondary_color' => $data['secondary_color'] ?: ($logoResult['secondary_hex'] ?: $company->secondary_color),
+            'primary_color' => ($data['primary_color'] ?? null) ?: ($logoResult['primary_hex'] ?? $company->primary_color),
+            'secondary_color' => ($data['secondary_color'] ?? null) ?: ($logoResult['secondary_hex'] ?? $company->secondary_color),
             'google_review_url' => $data['google_review_url'] ?? null,
             'industry' => $data['industry'] ?? null,
             'keywords' => $data['keywords'] ?? null,

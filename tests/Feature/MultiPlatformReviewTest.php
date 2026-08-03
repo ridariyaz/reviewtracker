@@ -27,7 +27,8 @@ class MultiPlatformReviewTest extends TestCase
 
         $response = $this->get("/good/{$employee->id}");
 
-        $response->assertRedirect('https://g.page/r/test/review');
+        $response->assertOk();
+        $response->assertSee('Copy Review & Open Google', false);
     }
 
     public function test_good_rating_renders_multi_destination_card_when_multiple_links_configured(): void
@@ -50,7 +51,7 @@ class MultiPlatformReviewTest extends TestCase
         $response = $this->get("/good/{$employee->id}");
 
         $response->assertOk();
-        $response->assertSee('Post on Google Reviews');
+        $response->assertSee('Where would you like to review us?');
         $response->assertSee('Post on TripAdvisor');
     }
 

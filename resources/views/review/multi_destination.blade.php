@@ -70,9 +70,9 @@
 
     <div class="destinations-list">
       @foreach($destinations as $dest)
-        <a class="dest-btn" href="{{ $dest['url'] }}" target="_blank" style="background: {{ $dest['bg'] }};">
+        <a class="dest-btn" href="{{ $dest['url'] }}" target="_blank" style="background: {{ $dest['bg'] ?? 'rgba(255,255,255,0.08)' }};">
           <div class="dest-info">
-            <span class="dest-icon">{{ $dest['icon'] }}</span>
+            <span class="dest-icon">{{ $dest['icon'] ?? '🌐' }}</span>
             <span>Post on {{ $dest['name'] }}</span>
           </div>
           <span style="font-size: 18px;">↗</span>

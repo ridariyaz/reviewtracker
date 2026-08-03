@@ -23,8 +23,8 @@ class HelpPageTest extends TestCase
         $response = $this->actingAs($user)->get('/help');
 
         $response->assertOk();
-        $response->assertSee('How ReviewTracker Works');
-        $response->assertSee('Configure Brand');
+        $response->assertSee('Help &amp; Searchable Feature Guide', false);
+        $response->assertSee('Take Feature Tour');
     }
 
     public function test_admin_dashboard_shows_quick_start_explainer(): void
@@ -39,6 +39,6 @@ class HelpPageTest extends TestCase
         $response = $this->actingAs($user)->get('/admin');
 
         $response->assertOk();
-        $response->assertSee('Welcome to ReviewTracker!');
+        $response->assertSee('Team & Review Dashboard', false);
     }
 }

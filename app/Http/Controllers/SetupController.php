@@ -81,7 +81,8 @@ class SetupController extends Controller
 
         return redirect()
             ->route('admin')
-            ->with('success', 'Company setup complete. You can now add employees and generate QR codes.');
+            ->with('success', 'Company setup complete. You can now add employees and generate QR codes.')
+            ->with('trigger_tour', true);
     }
 
     private function isAcceptableReviewUrl(string $url): bool

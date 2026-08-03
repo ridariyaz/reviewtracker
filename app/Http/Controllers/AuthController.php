@@ -70,7 +70,8 @@ class AuthController extends Controller
 
         return redirect()
             ->route('setup.show')
-            ->with('success', 'Account created. Set up your company and Google review URL to continue.');
+            ->with('success', 'Account created. Set up your company and Google review URL to continue.')
+            ->with('trigger_tour', true);
     }
 
     public function logout(Request $request)
