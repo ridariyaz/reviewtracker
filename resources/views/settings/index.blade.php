@@ -186,11 +186,11 @@
 
             <div class="form-group">
                 <label class="form-label">Upload Company Logo</label>
-                <input type="file" name="logo_file" class="form-control" accept="image/*">
-                <div class="helper-text">Uploading a logo automatically extracts brand color swatches below.</div>
+                <input type="file" name="logo_file" class="form-control" accept="image/*" onchange="extractSettingsLogoColors(this)">
+                <div class="helper-text">Selecting a logo file instantly extracts brand color swatches below!</div>
                 @if($company?->logo_url)
                     <div style="margin-top: 12px;">
-                        <img src="{{ $company->logo_url }}" style="max-height: 50px; border-radius: 8px;">
+                        <img src="{{ $company->logo_url }}" id="settingsLogoPreview" style="max-height: 50px; border-radius: 8px;">
                     </div>
                 @endif
             </div>
@@ -202,8 +202,8 @@
                     <input type="text" name="primary_color" id="settingsPrimaryHex" class="form-control" value="{{ old('primary_color', $company?->primary_color ?? '#0d6efd') }}" placeholder="#0d6efd" oninput="syncSettingsPrimary(this.value)">
                 </div>
                 
-                <div class="helper-text">Extracted Logo Color Swatches (Click any circle to set primary color):</div>
-                <div class="swatches-row">
+                <div class="helper-text" style="font-weight:700; color:var(--text-heading); margin-top:10px;">✨ Extracted Logo Colors (Click any circle to set primary color):</div>
+                <div class="swatches-row" id="settingsSwatchesRow">
                     <div class="swatch" style="background:#0d6efd" onclick="syncSettingsPrimary('#0d6efd')"></div>
                     <div class="swatch" style="background:#2563eb" onclick="syncSettingsPrimary('#2563eb')"></div>
                     <div class="swatch" style="background:#16a34a" onclick="syncSettingsPrimary('#16a34a')"></div>
@@ -410,6 +410,66 @@
             <button type="button" class="btn-danger" style="padding: 10px 14px;" onclick="this.parentElement.remove()">✕</button>
         `;
         container.appendChild(div);
+    }
+
+    function extractSettingsLogoColors(input) {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            const preview = document.getElementById('settingsLogoPreview');
+            if (preview) preview.src = e.target.result;
+
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 100;
+                canvas.height = 100;
+                ctx.drawImage(img, 0, 0, 100, 100);
+
+                const imageData = ctx.getImageData(0, 0, 100, 100).data;
+                const colorCounts = {};
+
+                for (let i = 0; i < imageData.length; i += 16) {
+                    const r = imageData[i];
+                    const g = imageData[i+1];
+                    const b = imageData[i+2];
+                    const a = imageData[i+3];
+
+                    if (a < 128) continue;
+                    if (r > 240 && g > 240 && b > 240) continue;
+                    if (r < 15 && g < 15 && b < 15) continue;
+
+                    const qr = Math.round(r / 32) * 32;
+                    const qg = Math.round(g / 32) * 32;
+                    const qb = Math.round(b / 32) * 32;
+                    const hex = "#" + ((1 << 24) + (qr << 16) + (qg << 8) + qb).toString(16).slice(1);
+                    colorCounts[hex] = (colorCounts[hex] || 0) + 1;
+                }
+
+                const sortedHexes = Object.keys(colorCounts).sort((a,b) => colorCounts[b] - colorCounts[a]).slice(0, 6);
+
+                if (sortedHexes.length > 0) {
+                    const row = document.getElementById('settingsSwatchesRow');
+                    if (row) {
+                        row.innerHTML = '';
+                        sortedHexes.forEach(hex => {
+                            const swatch = document.createElement('div');
+                            swatch.className = 'swatch';
+                            swatch.style.background = hex;
+                            swatch.onclick = function() { syncSettingsPrimary(hex); };
+                            row.appendChild(swatch);
+                        });
+                        syncSettingsPrimary(sortedHexes[0]);
+                    }
+                }
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
     }
 </script>
 @endsection
