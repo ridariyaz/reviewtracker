@@ -61,6 +61,8 @@ class AuthController extends Controller
             'username' => $data['username'],
             'password' => $data['password'],
             'is_admin' => true,
+            'is_superadmin' => false,
+            'status' => 'active',
             'provider' => 'local',
         ]);
 
