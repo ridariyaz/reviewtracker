@@ -52,16 +52,16 @@ class SetupController extends Controller
             ]);
         }
 
-        [$logoUrl, $autoPrimary, $autoSecondary] = $logos->saveAndExtractColors(
+        $logoResult = $logos->saveAndExtractColors(
             $request->file('logo_file'),
             $company->id
         );
 
         $company->update([
             'name' => $data['name'],
-            'logo_url' => $logoUrl ?: ($data['logo_url'] ?: $company->logo_url),
-            'primary_color' => $autoPrimary ?: ($data['primary_color'] ?? $company->primary_color ?? '#0d6efd'),
-            'secondary_color' => $autoSecondary ?: ($data['secondary_color'] ?? $company->secondary_color ?? '#111827'),
+            'logo_url' => $logoResult['logo_url'] ?: ($data['logo_url'] ?: $company->logo_url),
+            'primary_color' => $data['primary_color'] ?? ($logoResult['primary_hex'] ?? '#0d6efd'),
+            'secondary_color' => $data['secondary_color'] ?? ($logoResult['secondary_hex'] ?? '#111827'),
             'google_review_url' => $data['google_review_url'],
         ]);
 

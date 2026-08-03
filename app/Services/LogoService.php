@@ -18,6 +18,9 @@ class LogoService
     {
         if (! $file) {
             return [
+                0 => null,
+                1 => null,
+                2 => null,
                 'logo_url' => null,
                 'primary_hex' => null,
                 'secondary_hex' => null,
@@ -51,6 +54,9 @@ class LogoService
             $secondary = (count($paletteHex) > 1) ? $paletteHex[1] : '#020617';
 
             return [
+                0 => $logoUrl,
+                1 => $primary,
+                2 => $secondary,
                 'logo_url' => $logoUrl,
                 'primary_hex' => $primary,
                 'secondary_hex' => $secondary,
@@ -58,6 +64,9 @@ class LogoService
             ];
         } catch (\Throwable) {
             return [
+                0 => $logoUrl,
+                1 => '#0d6efd',
+                2 => '#020617',
                 'logo_url' => $logoUrl,
                 'primary_hex' => '#0d6efd',
                 'secondary_hex' => '#020617',

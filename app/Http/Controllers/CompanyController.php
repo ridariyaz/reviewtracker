@@ -51,15 +51,15 @@ class CompanyController extends Controller
             'name' => $data['name'],
         ]);
 
-        [$logoUrl, $autoPrimary, $autoSecondary] = $logos->saveAndExtractColors(
+        $logoResult = $logos->saveAndExtractColors(
             $request->file('logo_file'),
             $company->id
         );
 
         $company->update([
-            'logo_url' => $logoUrl ?: ($data['logo_url'] ?? null),
-            'primary_color' => $autoPrimary ?: ($data['primary_color'] ?? '#0d6efd'),
-            'secondary_color' => $autoSecondary ?: ($data['secondary_color'] ?? '#111827'),
+            'logo_url' => $logoResult['logo_url'] ?: ($data['logo_url'] ?? null),
+            'primary_color' => $data['primary_color'] ?? ($logoResult['primary_hex'] ?? '#0d6efd'),
+            'secondary_color' => $data['secondary_color'] ?? ($logoResult['secondary_hex'] ?? '#111827'),
             'google_review_url' => $data['google_review_url'],
             'tripadvisor_review_url' => $data['tripadvisor_review_url'] ?? null,
             'yelp_review_url' => $data['yelp_review_url'] ?? null,
@@ -68,7 +68,7 @@ class CompanyController extends Controller
 
         session(['company_id' => $company->id]);
 
-        return redirect()->route('companies.index');
+        return redirect()->route('settings.index')->with('success_pref', 'Company created successfully.');
     }
 
     public function update(Request $request, Company $company, LogoService $logos)
@@ -89,23 +89,23 @@ class CompanyController extends Controller
 
         $this->assertAcceptableReviewUrl($data['google_review_url']);
 
-        [$logoUrl, $autoPrimary, $autoSecondary] = $logos->saveAndExtractColors(
+        $logoResult = $logos->saveAndExtractColors(
             $request->file('logo_file'),
             $company->id
         );
 
         $company->update([
             'name' => $data['name'],
-            'logo_url' => $logoUrl ?: ($data['logo_url'] ?: $company->logo_url),
-            'primary_color' => $autoPrimary ?: ($data['primary_color'] ?? $company->primary_color),
-            'secondary_color' => $autoSecondary ?: ($data['secondary_color'] ?? $company->secondary_color),
+            'logo_url' => $logoResult['logo_url'] ?: ($data['logo_url'] ?: $company->logo_url),
+            'primary_color' => $data['primary_color'] ?: ($logoResult['primary_hex'] ?: $company->primary_color),
+            'secondary_color' => $data['secondary_color'] ?: ($logoResult['secondary_hex'] ?: $company->secondary_color),
             'google_review_url' => $data['google_review_url'],
             'tripadvisor_review_url' => $data['tripadvisor_review_url'] ?? null,
             'yelp_review_url' => $data['yelp_review_url'] ?? null,
             'trustpilot_review_url' => $data['trustpilot_review_url'] ?? null,
         ]);
 
-        return redirect()->route('companies.index');
+        return redirect()->route('settings.index')->with('success_pref', 'Company updated successfully.');
     }
 
     /** Persist the selected company id in session for subsequent admin pages. */
