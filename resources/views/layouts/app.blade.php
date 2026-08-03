@@ -110,16 +110,42 @@
       margin-left: 4px;
     }
 
-    .company-select-dropdown {
-      padding: 6px 12px;
-      border-radius: 10px;
-      border: 1px solid var(--border-color);
+    .company-switcher {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       background: var(--input-bg);
+      padding: 4px 8px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+    .company-select-dropdown {
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
       color: var(--text-heading);
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
     }
+    .company-select-dropdown:focus { outline: none; }
+
+    .btn-top-add-company {
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.2s ease;
+    }
+    .btn-top-add-company:hover { background: var(--primary-dark); }
 
     .theme-toggle-btn {
       background: var(--input-bg);
@@ -221,10 +247,6 @@
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
         <span>Dashboard</span>
       </a>
-      <a class="nav-link" href="{{ route('companies.index') }}">
-        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-        <span>Companies</span>
-      </a>
       <a class="nav-link" href="{{ route('employees.index') }}">
         <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
         <span>Employees</span>
@@ -249,18 +271,25 @@
         <span>Help</span>
       </a>
 
-      @isset($companies)
-        @if($companies->count())
-        <form action="{{ route('companies.switch') }}" method="POST" style="margin:0;">
-          @csrf
-          <select name="company_id" onchange="this.form.submit()" class="company-select-dropdown">
-            @foreach($companies as $c)
-              <option value="{{ $c->id }}" @selected(isset($currentCompany) && $c->id === $currentCompany->id)>🏢 {{ $c->name }}</option>
-            @endforeach
-          </select>
-        </form>
-        @endif
-      @endisset
+      <!-- Right Side Company Switcher & + Add Company Button -->
+      <div class="company-switcher">
+        @isset($companies)
+          @if($companies->count())
+          <form action="{{ route('companies.switch') }}" method="POST" style="margin:0;">
+            @csrf
+            <select name="company_id" onchange="this.form.submit()" class="company-select-dropdown" title="Switch active company">
+              @foreach($companies as $c)
+                <option value="{{ $c->id }}" @selected(isset($currentCompany) && $c->id === $currentCompany->id)>{{ $c->name }}</option>
+              @endforeach
+            </select>
+          </form>
+          @endif
+        @endisset
+        
+        <button type="button" class="btn-top-add-company" onclick="openGlobalAddCompanyModal()" title="Create new company">
+          <span>+ Add Company</span>
+        </button>
+      </div>
 
       <button type="button" class="theme-toggle-btn" onclick="toggleAppTheme()">
         <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
@@ -274,7 +303,43 @@
     @yield('content')
   </div>
 
+  <!-- Global Add Company Modal Popup -->
+  <div id="globalAddCompanyModal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">+ Create New Company</h3>
+        <button class="modal-close" onclick="closeGlobalAddCompanyModal()">✕</button>
+      </div>
+      <form action="{{ route('companies.store') }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:13px;font-weight:700;margin-bottom:4px;" for="top_company_name">Company Name <span style="color:#ef4444;">*</span></label>
+          <input class="input" type="text" id="top_company_name" name="name" placeholder="e.g. Apex Electronics" required>
+        </div>
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:13px;font-weight:700;margin-bottom:4px;" for="top_google_url">Google Review Destination URL <span style="color:#ef4444;">*</span></label>
+          <input class="input" type="url" id="top_google_url" name="google_review_url" placeholder="https://g.page/r/your-place-id/review" required>
+        </div>
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:13px;font-weight:700;margin-bottom:4px;" for="top_logo_file">Company Logo (Optional)</label>
+          <input class="input" type="file" id="top_logo_file" name="logo_file" accept="image/*">
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+          <button type="button" class="btn btn-secondary" onclick="closeGlobalAddCompanyModal()">Cancel</button>
+          <button type="submit" class="btn">Create Company</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
+    function openGlobalAddCompanyModal() {
+      document.getElementById('globalAddCompanyModal').classList.add('active');
+    }
+    function closeGlobalAddCompanyModal() {
+      document.getElementById('globalAddCompanyModal').classList.remove('active');
+    }
+
     function applyTheme(theme) {
       document.documentElement.setAttribute('data-theme', theme);
       const btnText = document.getElementById('appThemeText');

@@ -146,6 +146,15 @@
         margin-bottom: 12px;
         align-items: center;
     }
+    .companies-list-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    .companies-list-table td {
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--border-color);
+    }
 </style>
 
 <div class="settings-container">
@@ -168,14 +177,46 @@
         </div>
     @endif
 
+    <!-- Admin Companies Overview Card -->
+    <div class="settings-card">
+        <div class="card-section-title">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span>Admin Companies Directory</span>
+        </div>
+        <div class="helper-text" style="margin-bottom:12px;">All companies created under your admin account. Use the switch button or top dropdown to switch active company.</div>
+        
+        <table class="companies-list-table">
+            @foreach($companies as $c)
+            <tr>
+                <td>
+                    <div style="font-weight:700; color:var(--text-heading);">{{ $c->name }}</div>
+                    <div class="muted" style="font-size:11px;">ID #{{ $c->id }} @if($c->google_review_url) · Google URL Set @else · No Link @endif</div>
+                </td>
+                <td style="text-align:right;">
+                    @if($company && $c->id === $company->id)
+                        <span class="pill">Active Company</span>
+                    @else
+                        <form action="{{ route('companies.switch') }}" method="POST" style="margin:0; display:inline;">
+                            @csrf
+                            <input type="hidden" name="company_id" value="{{ $c->id }}">
+                            <button type="submit" class="btn" style="padding:6px 14px; font-size:12px; background:var(--input-bg); color:var(--text-heading); border:1px solid var(--border-color);">Switch</button>
+                        </form>
+                    @endif
+                </td>
+            </tr>
+            @endforeach
+        </table>
+    </div>
+
+    <!-- Main Panel: Editing Active Company -->
     <form action="{{ route('settings.company') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
-        <!-- Section 1: Company Branding & Logo -->
+        <!-- Section 1: Active Company Branding & Logo -->
         <div class="settings-card">
             <div class="card-section-title">
-                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                <span>1. Company & Branding</span>
+                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                <span>1. Edit Active Company: {{ $company?->name }}</span>
             </div>
 
             <div class="form-group">
@@ -196,13 +237,13 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">Primary Brand Color (Color Wheel, Hex Text, or Clickable Logo Swatches)</label>
+                <label class="form-label">Primary Brand Color (Color Wheel, Hex Text, or Extracted Swatches)</label>
                 <div style="display:flex; gap:10px; align-items:center;">
                     <input type="color" id="settingsPrimaryWheel" style="width:44px; height:44px; padding:2px; border-radius:10px; border:1px solid var(--border-color); cursor:pointer;" value="{{ old('primary_color', $company?->primary_color ?? '#0d6efd') }}" onchange="syncSettingsPrimary(this.value)">
                     <input type="text" name="primary_color" id="settingsPrimaryHex" class="form-control" value="{{ old('primary_color', $company?->primary_color ?? '#0d6efd') }}" placeholder="#0d6efd" oninput="syncSettingsPrimary(this.value)">
                 </div>
                 
-                <div class="helper-text" style="font-weight:700; color:var(--text-heading); margin-top:10px;">✨ Extracted Logo Colors (Click any circle to set primary color):</div>
+                <div class="helper-text" style="font-weight:700; color:var(--text-heading); margin-top:10px;">Extracted Logo Colors (Click any circle to set primary color):</div>
                 <div class="swatches-row" id="settingsSwatchesRow">
                     <div class="swatch" style="background:#0d6efd" onclick="syncSettingsPrimary('#0d6efd')"></div>
                     <div class="swatch" style="background:#2563eb" onclick="syncSettingsPrimary('#2563eb')"></div>
@@ -261,7 +302,7 @@
                     <input type="checkbox" name="enable_multi_review_prompt" value="1" {{ $company?->enable_multi_review_prompt ? 'checked' : '' }}>
                     <span>Enable Multi-Platform Selection Screen for Customers</span>
                 </label>
-                <div class="helper-text">When checked, customers giving a positive rating see choices for Google, TripAdvisor, Yelp, etc.</div>
+                <div class="helper-text">When checked, customers giving a positive rating see choices for Google and custom links.</div>
             </div>
         </div>
 
