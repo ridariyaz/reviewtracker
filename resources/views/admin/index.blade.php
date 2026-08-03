@@ -15,29 +15,8 @@
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         <span>Add Employee</span>
       </button>
-      <button class="btn btn-secondary" onclick="startSpotlightTour()">
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
-        <span>Take Feature Tour</span>
-      </button>
     </div>
   </div>
-
-  @if($employees->isEmpty() || !optional($currentCompany)->hasValidGoogleReviewUrl())
-  <!-- Setup Feature Tour Card for New Admins -->
-  <div class="card" style="margin-bottom:24px; border:2px dashed var(--primary); background:linear-gradient(135deg, rgba(37,99,235,0.06), rgba(99,102,241,0.04));">
-    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
-      <div>
-        <div class="card-kicker" style="color:var(--primary);">Quick Onboarding</div>
-        <div class="card-title" style="font-size:1.25rem;">Explore ReviewTracker Features</div>
-        <p class="muted" style="margin-top:4px;">Take an interactive 30-second tour highlighting company branding, staff directory, and Google review acceleration.</p>
-      </div>
-      <button class="btn" style="padding:12px 24px; font-size:1rem;" onclick="startSpotlightTour()">
-        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;"><polygon points="10 8 16 12 10 16 10 8"></polygon><circle cx="12" cy="12" r="10"></circle></svg>
-        <span>Take Feature Tour</span>
-      </button>
-    </div>
-  </div>
-  @endif
 
   <!-- KPI Metric Overview Cards -->
   <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:18px; margin-bottom:24px;">

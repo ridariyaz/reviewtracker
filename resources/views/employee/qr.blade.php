@@ -212,14 +212,6 @@
       <span>Back</span>
     </a>
 
-    <form action="{{ route('employee.force_win') }}" method="POST" style="margin:0; display:inline-block;">
-      @csrf
-      <button type="submit" class="action-btn" style="background:#f59e0b; color:#000; font-weight:800; border:none;">
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M20 12v10H4V12"></path><path d="M22 7H2v5h20V7z"></path><path d="M12 22V7"></path></svg>
-        <span>Make Next Scan Win</span>
-      </button>
-    </form>
-
     <button type="button" class="action-btn btn-print" onclick="downloadQrCodeImage()">
       <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
       <span>Download QR Image</span>
