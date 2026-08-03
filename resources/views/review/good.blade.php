@@ -274,7 +274,7 @@
     <div id="toast" class="toast">Review copied to clipboard!</div>
 
     <script>
-        const employeeName = @json($employee->name ?? 'the staff');
+        const employeeName = @json($employee->name ?? 'the team');
         const companyName = @json($brandName);
         const googleReviewUrl = @json($googleReviewUrl);
         const industry = @json($industry ?? '');
@@ -282,69 +282,108 @@
 
         const customKeywordsList = rawKeywords ? rawKeywords.split(',').map(k => k.trim()).filter(Boolean) : [];
 
-        const openings = [
-            `Popped into ${companyName} today and ${employeeName} helped me out right away.`,
-            `Had a really smooth experience at ${companyName} thanks to ${employeeName}.`,
-            `Stopped by ${companyName} earlier and ${employeeName} provided awesome customer service.`,
-            `Huge thanks to ${employeeName} at ${companyName} for all the help today!`,
-            `Visited ${companyName} and had a great experience with ${employeeName}.`,
-            `If you're heading to ${companyName}, definitely ask for ${employeeName}.`,
-            `Just left ${companyName} and wanted to leave a quick shoutout for ${employeeName}.`,
-            `Great experience at ${companyName} today. ${employeeName} was super helpful.`
-        ];
-
-        const details = [
-            `They answered all my questions patiently and helped me pick the best option without being pushy.`,
-            `The store was clean, well organized, and the prices here are super fair.`,
-            `Super knowledgeable, gave me honest recommendations, and got everything sorted in under 5 minutes.`,
-            `They have a great selection of top quality options at reasonable prices.`,
-            `Quick checkout, fair pricing, and really attentive staff.`,
-            `They listened to what I needed, saved me time, and made sure I got top quality.`,
-            `Very polite, efficient, and made the whole process quick and easy.`
-        ];
-
-        if (customKeywordsList.length > 0) {
-            customKeywordsList.forEach(kw => {
-                details.push(`Special thanks for the ${kw} — really appreciated the attention to detail!`);
-                details.push(`I was impressed by the ${kw} and how smooth everything was.`);
-            });
-        }
-
-        const closings = [
-            `Definitely my new go-to local spot. Highly recommend!`,
-            `Awesome customer service and fair prices — 5 stars!`,
-            `Easily the best customer service in the area. Will definitely be back!`,
-            `Clean environment, fast service, and great prices. Highly recommended!`,
-            `Top-notch service from start to finish. I'll be returning for sure!`,
-            `Great local business with fantastic staff. 10/10!`
-        ];
-
-        const seenReviews = new Set();
-
-        function getRandomElement(arr) {
-            return arr[Math.floor(Math.random() * arr.length)];
-        }
+        // Category specific review scenario generators
+        const categoryScenarios = {
+            'Restaurant & Dining': [
+                'The food came out fresh and hot and the table service was super prompt.',
+                'Great atmosphere, delicious meal, and really friendly attentive staff.',
+                'The food quality was top notch and everything was served quickly.'
+            ],
+            'Automotive & Repair': [
+                'They diagnosed the issue quickly and explained everything clearly before doing any work.',
+                'Fast turnaround time, fair transparent pricing, and my car is running perfectly.',
+                'Honest advice, quick inspection, and very professional service overall.'
+            ],
+            'Beauty & Salon': [
+                'The place is spotless and super relaxing, and they really paid attention to detail.',
+                'Felt super comfortable from start to finish and I walked out really happy with the results.',
+                'Great customer care, clean space, and helpful beauty recommendations.'
+            ],
+            'Medical & Dental': [
+                'Very gentle care, clean facility, and the front desk made check-in effortless.',
+                'They took time to explain everything clearly and made sure I felt comfortable throughout.',
+                'Punctual appointment times, polite staff, and very professional care.'
+            ],
+            'Fitness & Wellness': [
+                'Clean facilities, great equipment, and a very welcoming environment.',
+                'Attentive staff, clean locker rooms, and great positive energy all around.'
+            ],
+            'Home & Trades Services': [
+                'Punctual, clean work, and they solved the problem much faster than expected.',
+                'Very polite, respectful of the property, and explained the fix clearly.'
+            ],
+            'Professional Services': [
+                'Clear communication, fast turnaround, and they handled everything thoroughly.',
+                'Very knowledgeable team that saved me time and gave great guidance.'
+            ]
+        };
 
         function generateNewReview() {
-            let candidate = '';
-            let attempts = 0;
+            // 50% chance to mention employee name, 50% chance general team praise
+            const mentionStaff = Math.random() > 0.5;
 
-            do {
-                attempts++;
-                const open = getRandomElement(openings);
-                const detail = getRandomElement(details);
-                const close = getRandomElement(closings);
+            const staffOpenings = [
+                `Popped into ${companyName} today and ${employeeName} helped me out right away.`,
+                `Had a really smooth experience at ${companyName} thanks to ${employeeName}.`,
+                `Stopped by ${companyName} earlier and ${employeeName} provided awesome customer service.`,
+                `Huge thanks to ${employeeName} at ${companyName} for all the help today.`,
+                `Visited ${companyName} and had a great experience with ${employeeName}.`,
+                `If you're heading to ${companyName}, definitely ask for ${employeeName}.`,
+                `Just left ${companyName} and wanted to leave a quick shoutout for ${employeeName}.`,
+                `Great experience at ${companyName} today. ${employeeName} was super helpful.`
+            ];
 
-                candidate = `${open} ${detail} ${close}`;
+            const generalOpenings = [
+                `Popped into ${companyName} today and the service was fantastic right away.`,
+                `Had a really smooth experience at ${companyName} from start to finish.`,
+                `Stopped by ${companyName} earlier and received awesome customer service.`,
+                `Visited ${companyName} today and was really impressed by the team.`,
+                `Just left ${companyName} and wanted to share how great the visit was.`,
+                `Great experience at ${companyName} today. Everyone was super helpful.`
+            ];
 
-                if (attempts > 200) {
-                    seenReviews.clear();
-                    break;
-                }
-            } while (seenReviews.has(candidate));
+            const generalDetails = [
+                'They answered all my questions patiently and helped me pick the best option without being pushy.',
+                'The place was clean, well organized, and the pricing here is super fair.',
+                'Super knowledgeable staff, gave me honest recommendations, and got everything sorted in under 5 minutes.',
+                'They have a great selection of top quality options at reasonable prices.',
+                'Quick checkout, fair pricing, and really attentive service.',
+                'Very polite, efficient, and made the whole process quick and easy.'
+            ];
 
-            seenReviews.add(candidate);
-            document.getElementById('reviewText').value = candidate;
+            const closings = [
+                'Definitely my new go to local spot. Highly recommend!',
+                'Awesome customer service and fair prices. Easily 5 stars.',
+                'Easily the best customer service in the area. Will definitely be back!',
+                'Clean environment, fast service, and great value. Highly recommended!',
+                'Top notch service from start to finish. I will be returning for sure.',
+                'Great local business with fantastic staff. Would recommend to anyone.'
+            ];
+
+            const openingList = mentionStaff ? staffOpenings : generalOpenings;
+            let openSentence = getRandomElement(openingList);
+
+            let detailList = [...generalDetails];
+            if (industry && categoryScenarios[industry]) {
+                detailList = detailList.concat(categoryScenarios[industry]);
+            }
+
+            if (customKeywordsList.length > 0) {
+                customKeywordsList.forEach(kw => {
+                    detailList.push(`Special thanks for the ${kw}, really appreciated the attention to detail.`);
+                    detailList.push(`I was impressed by the ${kw} and how smooth everything went.`);
+                });
+            }
+
+            let detailSentence = getRandomElement(detailList);
+            let closeSentence = getRandomElement(closings);
+
+            let reviewText = `${openSentence} ${detailSentence} ${closeSentence}`;
+
+            // Clean all dashes and double spaces
+            reviewText = reviewText.replace(/[-—]/g, '').replace(/\s+/g, ' ').trim();
+
+            document.getElementById('reviewText').value = reviewText;
         }
 
         function showToast(message) {

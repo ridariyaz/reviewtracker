@@ -142,6 +142,17 @@
             </div>
 
             <div class="form-group">
+                <label>Business Category / Industry</label>
+                <select name="industry" class="input-field">
+                    <option value="">Select Business Type...</option>
+                    @foreach($industries as $ind)
+                        <option value="{{ $ind }}" {{ (old('industry', $company->industry) === $ind) ? 'selected' : '' }}>{{ $ind }}</option>
+                    @endforeach
+                </select>
+                <div class="helper">Helps our review generator write authentic, human reviews tailored for your industry.</div>
+            </div>
+
+            <div class="form-group">
                 <label>Google Review URL <span style="color:#ef4444;">*</span></label>
                 <input type="url" name="google_review_url" class="input-field" value="{{ old('google_review_url', $company->google_review_url) }}" placeholder="https://g.page/r/your-place-id/review" required>
                 <div class="helper">This is where happy 5-star customers will be directed to post their review.</div>

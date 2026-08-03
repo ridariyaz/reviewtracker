@@ -22,6 +22,17 @@ class SetupController extends Controller
             return redirect()->route('admin');
         }
 
+        $industries = [
+            'General Retail',
+            'Restaurant & Dining',
+            'Automotive & Repair',
+            'Beauty & Salon',
+            'Medical & Dental',
+            'Fitness & Wellness',
+            'Professional Services',
+            'Home & Trades Services',
+        ];
+
         return view('setup.index', [
             'company' => $company,
             'brandName' => $company->name,
@@ -29,6 +40,7 @@ class SetupController extends Controller
             'companies' => $companies->companiesFor($user),
             'currentCompany' => $company,
             'setupRequired' => true,
+            'industries' => $industries,
         ]);
     }
 
@@ -39,6 +51,7 @@ class SetupController extends Controller
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'industry' => ['nullable', 'string', 'max:255'],
             'logo_file' => ['nullable', 'image', 'max:4096'],
             'logo_url' => ['nullable', 'string', 'max:2048'],
             'primary_color' => ['nullable', 'string', 'max:20'],
@@ -59,6 +72,7 @@ class SetupController extends Controller
 
         $company->update([
             'name' => $data['name'],
+            'industry' => $data['industry'] ?? null,
             'logo_url' => $logoResult['logo_url'] ?: ($data['logo_url'] ?: $company->logo_url),
             'primary_color' => $data['primary_color'] ?? ($logoResult['primary_hex'] ?? '#0d6efd'),
             'secondary_color' => $data['secondary_color'] ?? ($logoResult['secondary_hex'] ?? '#111827'),
