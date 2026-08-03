@@ -412,9 +412,9 @@
   </style>
 
   <!-- Interactive Spotlight Tour Overlay -->
-  <div id="spotlightTourOverlay" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(15, 23, 42, 0.75); pointer-events:auto;">
-    <div id="spotlightHighlightBox" style="display:none;"></div>
-    <div id="spotlightTooltipCard" style="position:absolute; z-index:10002; background:var(--card-bg); color:var(--text-main); border:1px solid var(--border-color); width:320px; border-radius:16px; padding:20px; box-shadow:0 25px 60px rgba(0,0,0,0.7); transition:all 0.3s ease;">
+  <div id="spotlightTourOverlay" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(15, 23, 42, 0.78); pointer-events:auto; transition:clip-path 0.25s ease;">
+    <div id="spotlightHighlightBox" style="display:none; position:absolute; z-index:10000; border:2.5px solid var(--primary); border-radius:10px; box-shadow:0 0 20px rgba(37, 99, 235, 0.6); pointer-events:none; transition:all 0.25s ease;"></div>
+    <div id="spotlightTooltipCard" style="position:absolute; z-index:10002; background:var(--card-bg); color:var(--text-main); border:1px solid var(--border-color); width:320px; border-radius:16px; padding:20px; box-shadow:0 25px 60px rgba(0,0,0,0.75); transition:all 0.3s ease;">
       <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--primary); font-weight:700; margin-bottom:4px;" id="spotlightStepCounter">Step 1 of 5</div>
       <div style="font-size:1rem; font-weight:800; color:var(--text-heading); margin-bottom:6px;" id="spotlightStepTitle">Welcome Tour</div>
       <div style="font-size:0.88rem; color:var(--text-muted); line-height:1.45; margin-bottom:16px;" id="spotlightStepBody">Description</div>
@@ -465,10 +465,46 @@
 
     let currentTourIndex = 0;
 
-    function clearSpotlightTargetHighlights() {
-      document.querySelectorAll('.spotlight-active-target').forEach(el => {
-        el.classList.remove('spotlight-active-target');
-      });
+    function applySpotlightHole(rect) {
+      const overlay = document.getElementById('spotlightTourOverlay');
+      const highlightBox = document.getElementById('spotlightHighlightBox');
+
+      if (!rect) {
+        overlay.style.clipPath = 'none';
+        highlightBox.style.display = 'none';
+        return;
+      }
+
+      const pad = 6;
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+
+      const L = Math.max(0, Math.floor(rect.left - pad));
+      const T = Math.max(0, Math.floor(rect.top - pad));
+      const R = Math.min(W, Math.ceil(rect.right + pad));
+      const B = Math.min(H, Math.ceil(rect.bottom + pad));
+
+      const polygonPath = `polygon(
+        0px 0px,
+        ${W}px 0px,
+        ${W}px ${H}px,
+        0px ${H}px,
+        0px 0px,
+        0px ${T}px,
+        ${L}px ${T}px,
+        ${L}px ${B}px,
+        ${R}px ${B}px,
+        ${R}px ${T}px,
+        0px ${T}px
+      )`;
+
+      overlay.style.clipPath = polygonPath;
+
+      highlightBox.style.display = 'block';
+      highlightBox.style.top = T + 'px';
+      highlightBox.style.left = L + 'px';
+      highlightBox.style.width = (R - L) + 'px';
+      highlightBox.style.height = (B - T) + 'px';
     }
 
     function startSpotlightTour() {
@@ -478,8 +514,6 @@
     }
 
     function renderSpotlightStep() {
-      clearSpotlightTargetHighlights();
-
       const step = tourSteps[currentTourIndex];
       const targetEl = document.querySelector(step.selector);
       
@@ -493,8 +527,8 @@
       const tooltipCard = document.getElementById('spotlightTooltipCard');
 
       if (targetEl) {
-        targetEl.classList.add('spotlight-active-target');
         const rect = targetEl.getBoundingClientRect();
+        applySpotlightHole(rect);
 
         let topPos = rect.bottom + 14;
         if (topPos + 220 > window.innerHeight) {
@@ -508,6 +542,7 @@
         tooltipCard.style.top = Math.max(10, topPos) + 'px';
         tooltipCard.style.left = Math.max(10, leftPos) + 'px';
       } else {
+        applySpotlightHole(null);
         tooltipCard.style.top = '40%';
         tooltipCard.style.left = '30%';
       }
@@ -530,7 +565,7 @@
     }
 
     function closeSpotlightTour() {
-      clearSpotlightTargetHighlights();
+      applySpotlightHole(null);
       document.getElementById('spotlightTourOverlay').style.display = 'none';
       localStorage.setItem('reviewtracker_tour_done', '1');
     }
