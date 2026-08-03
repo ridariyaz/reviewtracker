@@ -41,6 +41,23 @@ class Company extends Model
         'gamification_interval' => 'integer',
     ];
 
+    public function getLogoUrlAttribute($value): ?string
+    {
+        if (! $value) {
+            return null;
+        }
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
+            return $value;
+        }
+        if (str_starts_with($value, '/storage/')) {
+            return $value;
+        }
+        if (str_starts_with($value, 'storage/')) {
+            return '/' . $value;
+        }
+        return '/storage/' . ltrim($value, '/');
+    }
+
     /** Returns array of active review platform links for multi-destination selection if enabled. */
     public function configuredReviewDestinations(): array
     {

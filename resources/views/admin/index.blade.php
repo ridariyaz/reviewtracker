@@ -1,23 +1,51 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard · ReviewTracker')
+@section('title', 'Admin Dashboard · ReviewTracker')
 
 @section('content')
   <div class="page-header">
     <div>
-      <div class="page-title">Team & QR Dashboard</div>
+      <div class="page-title">Team & Review Dashboard</div>
       <div class="page-subtitle">
-        Manage staff members, print review QR codes, and monitor Google review generation.
+        Monitor customer scan performance, manage staff QR standees, and accelerate Google Reviews.
       </div>
     </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;">
-      <button class="btn" onclick="openAddEmployeeModal()">+ Add Employee</button>
-      <a href="{{ route('feedback.index') }}" class="btn btn-secondary" style="position:relative;">
-        Feedback Inbox
-        @if(($unresolvedFeedbackCount ?? 0) > 0)
-          <span class="nav-badge" style="position:absolute;top:-6px;right:-6px;">{{ $unresolvedFeedbackCount }}</span>
-        @endif
-      </a>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <button class="btn" onclick="openAddEmployeeModal()">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <span>+ Add Employee</span>
+      </button>
+      <button class="btn btn-secondary" onclick="openWelcomeModalTour()">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+        <span>Take Feature Tour</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI Metric Overview Cards -->
+  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:18px; margin-bottom:24px;">
+    <div class="card" style="padding:18px 20px;">
+      <div class="card-kicker">Total Scans</div>
+      <div style="font-size:1.8rem; font-weight:800; color:var(--text-heading); margin-top:4px;">{{ $employees->sum('scans') }}</div>
+      <div class="muted" style="font-size:12px; margin-top:2px;">Customer QR scans logged</div>
+    </div>
+
+    <div class="card" style="padding:18px 20px; border-left:4px solid #22c55e;">
+      <div class="card-kicker" style="color:#16a34a;">Positive 5-Star Reviews</div>
+      <div style="font-size:1.8rem; font-weight:800; color:#16a34a; margin-top:4px;">{{ $employees->sum('good_count') }}</div>
+      <div class="muted" style="font-size:12px; margin-top:2px;">Routed to Google Maps</div>
+    </div>
+
+    <div class="card" style="padding:18px 20px; border-left:4px solid #eab308;">
+      <div class="card-kicker" style="color:#ca8a04;">Private Feedback</div>
+      <div style="font-size:1.8rem; font-weight:800; color:#ca8a04; margin-top:4px;">{{ $employees->sum('ok_count') + $employees->sum('bad_count') }}</div>
+      <div class="muted" style="font-size:12px; margin-top:2px;">Intercepted internally</div>
+    </div>
+
+    <div class="card" style="padding:18px 20px; border-left:4px solid var(--primary);">
+      <div class="card-kicker" style="color:var(--primary);">Active Staff</div>
+      <div style="font-size:1.8rem; font-weight:800; color:var(--primary); margin-top:4px;">{{ $employees->count() }}</div>
+      <div class="muted" style="font-size:12px; margin-top:2px;">Team members with QR codes</div>
     </div>
   </div>
 
@@ -38,7 +66,7 @@
       .badge-rank.top1 { border-color:#facc15; background:#fefce8; color:#854d0e; }
       .badge-rank.top2 { border-color:#a1a1aa; background:#f4f4f5; color:#3f3f46; }
       .badge-rank.top3 { border-color:#f97316; background:#fff7ed; color:#9a3412; }
-      .btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 8px; font-weight: 600; text-decoration: none; border: 1px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+      .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; font-weight: 600; text-decoration: none; border: 1px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
       .btn-sm-edit { background: var(--input-bg); color: var(--text-main); border-color: var(--border-color); }
       .btn-sm-edit:hover { border-color: var(--primary); color: var(--primary); }
       .btn-sm-danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.2); }
@@ -93,7 +121,7 @@
                   $svgDataUri = (new \App\Services\QrCodeService())->generateSvgDataUri($qrUrl);
                 @endphp
                 <div class="qr-thumb-box">
-                  <img src="{{ $svgDataUri }}" width="56" height="56" alt="QR for {{ $employee->name }}">
+                  <img src="{{ $svgDataUri }}" width="52" height="52" alt="QR for {{ $employee->name }}">
                 </div>
                 <div><a class="small-link" href="{{ route('review.show', $employee) }}" target="_blank">Test QR ↗</a></div>
               </td>
@@ -143,7 +171,7 @@
               </div>
               <div style="text-align:right;">
                 <div class="pill" style="margin-bottom:2px;">{{ $employee->scans }} scans</div>
-                <div class="muted" style="font-size:11px;">👍 {{ $employee->good_count }} · 😐 {{ $employee->ok_count }} · ⚠️ {{ $employee->bad_count }}</div>
+                <div class="muted" style="font-size:11px;">Good: {{ $employee->good_count }} · OK: {{ $employee->ok_count }} · Bad: {{ $employee->bad_count }}</div>
               </div>
             </div>
           </li>
@@ -215,11 +243,12 @@
       </form>
     </div>
   </div>
+
   <!-- Interactive Welcome Onboarding Tour Modal Popup -->
   <div id="welcomeModal" class="modal-backdrop">
     <div class="modal-box" style="max-width:520px;">
       <div class="modal-header">
-        <h3 class="modal-title">⚡ Welcome to ReviewTracker!</h3>
+        <h3 class="modal-title">Welcome to ReviewTracker</h3>
         <button class="modal-close" onclick="dismissWelcomeModal()">✕</button>
       </div>
       <div style="font-size:14px; color:var(--text-muted); line-height:1.55; margin-bottom:20px;">
@@ -257,6 +286,10 @@
 
   function closeEditEmployeeModal() {
     document.getElementById('editEmployeeModal').classList.remove('active');
+  }
+
+  function openWelcomeModalTour() {
+    document.getElementById('welcomeModal').classList.add('active');
   }
 
   function dismissWelcomeModal() {

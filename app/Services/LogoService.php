@@ -32,7 +32,7 @@ class LogoService
         $filename = "company_{$companyId}.{$ext}";
         $path = $file->storeAs('logos', $filename, 'public');
         $fullPath = Storage::disk('public')->path($path);
-        $logoUrl = Storage::disk('public')->url($path);
+        $logoUrl = '/storage/' . $path;
 
         $paletteHex = [];
 

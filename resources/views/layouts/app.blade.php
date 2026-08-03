@@ -236,7 +236,13 @@
   @else
   <div class="topbar">
     <div class="brand">
-      <div class="brand-badge">{{ strtoupper(substr($brandName ?? config('app.name'), 0, 1)) }}</div>
+      @if(!empty($currentCompany?->logo_url) || !empty($brandLogoUrl))
+        <div class="brand-logo-img-wrapper" style="width:38px; height:38px; border-radius:10px; overflow:hidden; border:1px solid var(--border-color); background:var(--input-bg); display:flex; align-items:center; justify-content:center;">
+          <img src="{{ $currentCompany?->logo_url ?? $brandLogoUrl }}" alt="Logo" style="width:100%; height:100%; object-fit:contain;">
+        </div>
+      @else
+        <div class="brand-badge">{{ strtoupper(substr($brandName ?? config('app.name'), 0, 1)) }}</div>
+      @endif
       <div>
         <div style="color: var(--text-heading); font-weight: 700;">{{ $brandName ?? config('app.name') }}</div>
         <div class="brand-sub">Employee Review Accelerator</div>
