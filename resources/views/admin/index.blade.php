@@ -22,6 +22,23 @@
     </div>
   </div>
 
+  @if($employees->isEmpty() || !optional($currentCompany)->hasValidGoogleReviewUrl())
+  <!-- Start Setup Wizard Card for New Admins -->
+  <div class="card" style="margin-bottom:24px; border:2px dashed var(--primary); background:linear-gradient(135deg, rgba(37,99,235,0.06), rgba(99,102,241,0.04));">
+    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
+      <div>
+        <div class="card-kicker" style="color:var(--primary);">Initial Setup Required</div>
+        <div class="card-title" style="font-size:1.25rem;">Complete Business & Staff Setup</div>
+        <p class="muted" style="margin-top:4px;">Follow our step-by-step setup wizard to configure your brand logo, Google review link, and staff members.</p>
+      </div>
+      <a href="{{ route('setup.show') }}" class="btn" style="padding:12px 24px; font-size:1rem;">
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        <span>Start Setup Wizard</span>
+      </a>
+    </div>
+  </div>
+  @endif
+
   <!-- KPI Metric Overview Cards -->
   <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:18px; margin-bottom:24px;">
     <div class="card" style="padding:18px 20px;">

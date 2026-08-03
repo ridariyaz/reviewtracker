@@ -206,9 +206,7 @@
     }
   </style>
 </head>
-<body>
-
-  <div class="top-actions">
+<body>  <div class="top-actions">
     <a class="action-btn" href="{{ route('employee.dashboard') }}">
       <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
       <span>Back</span>
@@ -217,13 +215,19 @@
     <form action="{{ route('employee.force_win') }}" method="POST" style="margin:0; display:inline-block;">
       @csrf
       <button type="submit" class="action-btn" style="background:#f59e0b; color:#000; font-weight:800; border:none;">
-        <span>🎁 Make Next Scan Win!</span>
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M20 12v10H4V12"></path><path d="M22 7H2v5h20V7z"></path><path d="M12 22V7"></path></svg>
+        <span>Make Next Scan Win</span>
       </button>
     </form>
 
-    <button type="button" class="action-btn btn-print" onclick="window.print()">
+    <button type="button" class="action-btn btn-print" onclick="downloadQrCodeImage()">
+      <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      <span>Download QR Image</span>
+    </button>
+
+    <button type="button" class="action-btn" onclick="window.print()">
       <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-      <span>Print / Download Standee</span>
+      <span>Print Standee</span>
     </button>
   </div>
 
@@ -232,7 +236,7 @@
 
     <div class="brand-header">
       @if($brandLogoUrl)
-        <img src="{{ $brandLogoUrl }}" alt="{{ $brandName }}" class="brand-logo-img">
+        <img src="{{ $brandLogoUrl }}" alt="{{ $brandName }}" class="brand-logo-img" style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid var(--primary);">
       @endif
       <span class="brand-title">{{ $brandName }}</span>
     </div>
@@ -250,7 +254,7 @@
         $targetUrl = route('review.show', ['employee' => $employee->id ?? 1]).'?lang='.$lang;
         $svgDataUri = (new \App\Services\QrCodeService())->generateSvgDataUri($targetUrl);
       @endphp
-      <img src="{{ $svgDataUri }}" alt="Scan to Review">
+      <img id="qrCodeImage" src="{{ $svgDataUri }}" alt="Scan to Review">
     </div>
 
     <div class="call-to-action-title">Scan to Rate Your Experience</div>
@@ -258,13 +262,26 @@
 
     @if(!empty($enableGamification))
       <div class="gamification-contest-box">
-        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M20 12v10H4V12"></path><path d="M22 7H2v5h20V7z"></path><path d="M12 22V7"></path><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M20 12v10H4V12"></path><path d="M22 7H2v5h20V7z"></path><path d="M12 22V7"></path></svg>
         <span>Review Contest: Every {{ $gamificationInterval ?? 50 }}th scan wins {{ $gamificationReward ?? 'a gift' }}!</span>
       </div>
     @endif
 
     <div class="footer-note">Powered by ReviewTracker</div>
   </div>
+
+  <script>
+    function downloadQrCodeImage() {
+      const img = document.getElementById('qrCodeImage');
+      if (!img) return;
+      const link = document.createElement('a');
+      link.href = img.src;
+      link.download = 'qr-code-{{ \Illuminate\Support\Str::slug($employee->name ?? "staff") }}.svg';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  </script>/div>
 
 </body>
 </html>

@@ -345,13 +345,27 @@
                     <input type="checkbox" name="enable_gamification" value="1" {{ $company?->enable_gamification ? 'checked' : '' }}>
                     <span>Enable Customer Lucky Winner Contest</span>
                 </label>
-                <div class="helper-text">When enabled, customers see a gamified reward contest banner, and threshold reviewers trigger an instant Prize Winner card.</div>
+                <div class="helper-text">When enabled, customers see a gamified reward contest banner, and qualifying reviewers win a reward gift.</div>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Winner Interval Threshold (e.g. Every 50th reviewer wins)</label>
+                <label class="form-label">Winner Selection Method</label>
+                <div style="display:flex; flex-direction:column; gap:10px; margin-top:6px;">
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:0.9rem; color:var(--text-heading);">
+                        <input type="radio" name="gamification_mode" value="random" {{ ($company?->gamification_mode ?? 'random') === 'random' ? 'checked' : '' }}>
+                        <span><strong>Random Auto-Picker:</strong> Automatically pick every Nth customer scan as a winner.</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:0.9rem; color:var(--text-heading);">
+                        <input type="radio" name="gamification_mode" value="employee" {{ ($company?->gamification_mode) === 'employee' ? 'checked' : '' }}>
+                        <span><strong>Staff Choice Only:</strong> Staff click "Make Next Scan Win" button right before showing QR to customer.</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Random Winner Interval Threshold (for Random Auto-Picker)</label>
                 <input type="number" name="gamification_interval" class="form-control" value="{{ old('gamification_interval', $company?->gamification_interval ?? 50) }}" min="1" max="100000">
-                <div class="helper-text">Example: Entering 50 means every 50th customer scan/review wins a prize! (Tip: Set to 1 for instant live testing).</div>
+                <div class="helper-text">Example: Entering 50 means every 50th customer scan/review wins a prize! (Tip: Set to 1 for live testing).</div>
             </div>
 
             <div class="form-group">

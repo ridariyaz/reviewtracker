@@ -133,10 +133,16 @@
               <span>Fullscreen View</span>
             </a>
 
+            <a class="btn" style="background:#334155;" href="{{ $svgDataUri }}" download="qr-code-{{ \Illuminate\Support\Str::slug($employee->name) }}.svg">
+              <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              <span>Download QR</span>
+            </a>
+
             <form action="{{ route('employee.force_win') }}" method="POST" style="margin:0; display:inline-block;">
               @csrf
               <button type="submit" class="btn" style="background:#f59e0b; color:#000; font-weight:800;">
-                <span>🎁 Make Next Scan Win!</span>
+                <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M20 12v10H4V12"></path><path d="M22 7H2v5h20V7z"></path><path d="M12 22V7"></path></svg>
+                <span>Make Next Scan Win</span>
               </button>
             </form>
           </div>
@@ -147,7 +153,7 @@
             </div>
           @elseif($employee->force_next_win)
             <div style="margin-top:10px; padding:8px 12px; background:rgba(245,158,11,0.15); border:1px solid #f59e0b; color:#facc15; border-radius:8px; font-size:12px; font-weight:700;">
-              ✨ Next customer scan is GUARANTEED to win the reward prize!
+              Next customer scan is GUARANTEED to win the reward prize!
             </div>
           @endif
         </div>

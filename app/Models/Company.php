@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'keywords',
     'default_platform',
     'enable_gamification',
+    'gamification_mode',
     'gamification_interval',
     'gamification_reward',
     'gamification_image_url',

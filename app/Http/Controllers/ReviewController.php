@@ -83,11 +83,17 @@ class ReviewController extends Controller
 
         $totalScans = ScanLog::where('company_id', $employee->company_id)->count();
         $enableGamification = (bool) ($company?->enable_gamification);
+        $gamificationMode = $company?->gamification_mode ?? 'random';
         $interval = max(1, (int) ($company?->gamification_interval ?? 50));
         
         $forcedWin = (bool) ($employee->force_next_win);
-        $thresholdWin = $enableGamification && ($totalScans > 0) && ($totalScans % $interval === 0);
-        $isWinner = $forcedWin || $thresholdWin;
+        
+        if ($gamificationMode === 'employee') {
+            $isWinner = $forcedWin;
+        } else {
+            $thresholdWin = $enableGamification && ($totalScans > 0) && ($totalScans % $interval === 0);
+            $isWinner = $forcedWin || $thresholdWin;
+        }
 
         if ($forcedWin) {
             $employee->update(['force_next_win' => false]);

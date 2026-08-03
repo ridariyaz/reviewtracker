@@ -12,29 +12,35 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: var(--secondary);
+            background: radial-gradient(ellipse at top, var(--secondary), #020617 80%);
             color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             padding: 24px 16px;
+            -webkit-font-smoothing: antialiased;
         }
         .card {
             max-width: 480px;
             width: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(12px);
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(16px);
             border-radius: 24px;
             padding: 32px 24px;
             text-align: center;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
         }
-        .logo {
-            max-height: 60px;
-            margin-bottom: 16px;
-            object-fit: contain;
+        .logo-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            margin: 0 auto 16px;
+            display: block;
+            background: #000;
         }
         .badge-row {
             display: flex;
@@ -52,7 +58,7 @@
             border: 1px solid rgba(34, 197, 94, 0.3);
             padding: 6px 14px;
             border-radius: 20px;
-            font-size: 0.875rem;
+            font-size: 0.85rem;
             font-weight: 600;
         }
         .star-badge {
@@ -68,9 +74,10 @@
         }
         p.tagline {
             opacity: 0.85;
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             margin-bottom: 24px;
             line-height: 1.5;
+            color: #cbd5e1;
         }
         .review-box-wrapper {
             position: relative;
@@ -161,7 +168,7 @@
             border-radius: 14px;
             border: none;
             font-weight: 700;
-            font-size: 1.05rem;
+            font-size: 1rem;
             cursor: pointer;
             text-decoration: none;
             display: flex;
@@ -185,61 +192,34 @@
             pointer-events: none; z-index: 1000;
         }
         .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-
-        /* Winner Modal */
-        .winner-backdrop {
-            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(8px); display: flex; align-items: center;
-            justify-content: center; z-index: 2000; padding: 16px;
-        }
-        .winner-box {
-            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
-            border: 2px solid #f59e0b; color: #fff; width: 100%; max-width: 440px;
-            border-radius: 24px; padding: 28px 24px; text-align: center;
-            box-shadow: 0 20px 50px rgba(245, 158, 11, 0.3);
-        }
-        .claim-code-pill {
-            display: inline-block; background: #f59e0b; color: #000;
-            font-weight: 800; font-size: 1.3rem; padding: 8px 20px;
-            border-radius: 999px; letter-spacing: 0.1em; margin: 12px 0 16px;
-        }
     </style>
 </head>
 <body>
-    @if($isWinner)
-    <!-- Winner Screen Popup for 5-Star / Good Customers -->
-    <div id="winnerModal" class="winner-backdrop">
-        <div class="winner-box">
-            <div style="font-size:2.5rem; margin-bottom:8px;">🎉 🎁 🎉</div>
-            <h2 style="font-size:1.6rem; font-weight:800; color:#facc15; margin-bottom:6px;">LUCKY WINNER!</h2>
-            <p style="font-size:0.95rem; opacity:0.9; margin-bottom:12px;">You won a special prize for leaving a review!</p>
-
-            @if(!empty($gamificationImageUrl))
-                <div style="margin-bottom:14px; border-radius:14px; overflow:hidden; border:1px solid rgba(255,255,255,0.2);">
-                    <img src="{{ $gamificationImageUrl }}" alt="Prize photo" style="max-height:180px; width:100%; object-fit:contain; background:#000;">
-                </div>
-            @endif
-
-            <div style="font-size:1.15rem; font-weight:700; color:#ffffff; margin-bottom:4px;">
-                Reward: {{ $gamificationReward }}
-            </div>
-
-            <div class="claim-code-pill">{{ $winnerCode }}</div>
-
-            <p style="font-size:0.82rem; opacity:0.8; margin-bottom:20px;">
-                Show this claim code to your server or cashier to claim your reward gift!
-            </p>
-
-            <button type="button" class="btn" style="background:#f59e0b; color:#000; font-weight:800;" onclick="dismissWinnerModal()">
-                <span>Claim Prize & Write Review →</span>
-            </button>
-        </div>
-    </div>
-    @endif
-
     <div class="card">
         @if($brandLogoUrl)
-            <img src="{{ $brandLogoUrl }}" alt="{{ $brandName }}" class="logo">
+            <img src="{{ $brandLogoUrl }}" alt="{{ $brandName }}" class="logo-circle">
+        @endif
+
+        @if($isWinner)
+            <!-- Winner Banner Written Directly on Top of the Page -->
+            <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(234, 179, 8, 0.15)); border: 2px solid #f59e0b; border-radius: 18px; padding: 20px; margin-bottom: 24px; text-align: center;">
+                <div style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; color:#facc15; margin-bottom:4px;">Review Contest Winner</div>
+                <h2 style="font-size:1.35rem; font-weight:800; color:#ffffff; margin-bottom:6px;">You Won: {{ $gamificationReward }}</h2>
+                
+                @if(!empty($gamificationImageUrl))
+                    <div style="margin: 12px 0; border-radius: 12px; overflow: hidden; max-height: 140px; border: 1px solid rgba(255,255,255,0.2);">
+                        <img src="{{ $gamificationImageUrl }}" alt="Prize" style="width:100%; height:140px; object-fit:contain; background:#000;">
+                    </div>
+                @endif
+
+                <div style="background:#f59e0b; color:#000; font-weight:800; font-size:1.15rem; padding:8px 18px; border-radius:999px; display:inline-block; margin:8px 0; letter-spacing:1px;">
+                    CLAIM CODE: {{ $winnerCode }}
+                </div>
+                
+                <p style="font-size:0.85rem; color:#e2e8f0; margin-top:8px; line-height:1.4;">
+                    Assisted by <strong>{{ $employee->name ?? 'our staff' }}</strong>. Complete your Google Review below and show our staff to claim your prize!
+                </p>
+            </div>
         @endif
 
         <div class="badge-row">
@@ -285,12 +265,6 @@
     <div id="toast" class="toast">Review copied to clipboard!</div>
 
     <script>
-        function dismissWinnerModal() {
-            const el = document.getElementById('winnerModal');
-            if (el) el.style.display = 'none';
-            openGoogleInstant();
-        }
-
         const employeeName = @json($employee->name ?? 'the staff');
         const companyName = @json($brandName);
         const googleReviewUrl = @json($googleReviewUrl);
