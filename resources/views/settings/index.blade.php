@@ -186,25 +186,27 @@
         <div class="helper-text" style="margin-bottom:12px;">All companies created under your admin account. Use the switch button or top dropdown to switch active company.</div>
         
         <table class="companies-list-table">
-            @foreach($companies as $c)
-            <tr>
-                <td>
-                    <div style="font-weight:700; color:var(--text-heading);">{{ $c->name }}</div>
-                    <div class="muted" style="font-size:11px;">ID #{{ $c->id }} @if($c->google_review_url) · Google URL Set @else · No Link @endif</div>
-                </td>
-                <td style="text-align:right;">
-                    @if($company && $c->id === $company->id)
-                        <span class="pill">Active Company</span>
-                    @else
-                        <form action="{{ route('companies.switch') }}" method="POST" style="margin:0; display:inline;">
-                            @csrf
-                            <input type="hidden" name="company_id" value="{{ $c->id }}">
-                            <button type="submit" class="btn" style="padding:6px 14px; font-size:12px; background:var(--input-bg); color:var(--text-heading); border:1px solid var(--border-color);">Switch</button>
-                        </form>
-                    @endif
-                </td>
-            </tr>
-            @endforeach
+            @isset($companies)
+                @foreach($companies as $c)
+                <tr>
+                    <td>
+                        <div style="font-weight:700; color:var(--text-heading);">{{ $c->name }}</div>
+                        <div class="muted" style="font-size:11px;">ID #{{ $c->id }} @if($c->google_review_url) · Google URL Set @else · No Link @endif</div>
+                    </td>
+                    <td style="text-align:right;">
+                        @if($company && $c->id === $company->id)
+                            <span class="pill">Active Company</span>
+                        @else
+                            <form action="{{ route('companies.switch') }}" method="POST" style="margin:0; display:inline;">
+                                @csrf
+                                <input type="hidden" name="company_id" value="{{ $c->id }}">
+                                <button type="submit" class="btn" style="padding:6px 14px; font-size:12px; background:var(--input-bg); color:var(--text-heading); border:1px solid var(--border-color);">Switch</button>
+                            </form>
+                        @endif
+                    </td>
+                </tr>
+                @endforeach
+            @endisset
         </table>
     </div>
 

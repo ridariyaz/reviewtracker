@@ -19,6 +19,8 @@ class SettingsController extends Controller
         return view('settings.index', [
             'user' => $user,
             'company' => $company,
+            'companies' => $companies->companiesFor($user),
+            'currentCompany' => $company,
             'brandName' => $company?->name ?? config('app.name'),
             'languages' => [
                 'en' => ['name' => 'English', 'dir' => 'ltr', 'flag' => '🇬🇧'],
