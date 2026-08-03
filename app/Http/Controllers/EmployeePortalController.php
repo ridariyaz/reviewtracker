@@ -24,26 +24,45 @@ class EmployeePortalController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'username' => ['required', 'string'],
-            'password' => ['required', 'string'],
-        ]);
+        try {
+            $credentials = $request->validate([
+                'username' => ['required', 'string'],
+                'password' => ['required', 'string', 'min:6'],
+            ], [
+                'password.min' => 'Password must be at least 6 characters long.',
+            ]);
 
-        // Avoid mixing admin + employee sessions in the same browser.
-        Auth::guard('web')->logout();
+            // Avoid mixing admin + employee sessions in the same browser.
+            Auth::guard('web')->logout();
 
-        $ok = Auth::guard('employee')->attempt([
-            'employee_username' => $credentials['username'],
-            'password' => $credentials['password'],
-        ]);
+            // Support matching employee credentials across different companies
+            $employees = Employee::where('employee_username', trim($credentials['username']))->get();
 
-        if (! $ok) {
-            return back()->withInput()->with('error', 'Invalid employee credentials. Please try again.');
+            foreach ($employees as $employee) {
+                if ($employee->employee_password && \Illuminate\Support\Facades\Hash::check($credentials['password'], $employee->employee_password)) {
+                    Auth::guard('employee')->login($employee);
+                    $request->session()->regenerate();
+                    return redirect()->route('employee.dashboard');
+                }
+            }
+
+            // Fallback guard attempt
+            $ok = Auth::guard('employee')->attempt([
+                'employee_username' => trim($credentials['username']),
+                'password' => $credentials['password'],
+            ]);
+
+            if ($ok) {
+                $request->session()->regenerate();
+                return redirect()->route('employee.dashboard');
+            }
+
+            return back()->withInput()->with('error', 'Invalid employee credentials. Please check your username and password.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            return back()->withInput()->with('error', 'Login system error: ' . $e->getMessage());
         }
-
-        $request->session()->regenerate();
-
-        return redirect()->route('employee.dashboard');
     }
 
     public function logout(Request $request)
