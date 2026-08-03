@@ -204,6 +204,13 @@
         page-break-inside: avoid;
       }
     }
+    @media (max-width: 480px) {
+      body { padding: 12px 10px; }
+      .top-actions { top: 10px; padding: 0 10px; gap: 6px; }
+      .action-btn { padding: 8px 12px; font-size: 0.78rem; }
+      .standee-card { margin-top: 50px; padding: 24px 18px; border-radius: 22px; }
+      .call-to-action-title { font-size: 1.15rem; }
+    }
   </style>
 </head>
 <body>  <div class="top-actions">

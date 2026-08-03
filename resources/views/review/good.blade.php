@@ -192,6 +192,15 @@
             pointer-events: none; z-index: 1000;
         }
         .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        @media (max-width: 480px) {
+            body { padding: 12px 10px; }
+            .card { padding: 22px 16px; border-radius: 20px; }
+            .logo-circle { width: 68px; height: 68px; margin-bottom: 12px; }
+            h1 { font-size: 1.25rem; }
+            p.tagline { font-size: 0.85rem; margin-bottom: 18px; }
+            .btn { padding: 14px 16px; font-size: 0.95rem; }
+            .review-textarea { min-height: 110px; font-size: 0.9rem; }
+        }
     </style>
 </head>
 <body>

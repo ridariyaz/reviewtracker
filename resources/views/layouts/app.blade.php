@@ -227,6 +227,67 @@
     .modal-title { font-size: 18px; font-weight: 700; color: var(--text-heading); margin: 0; }
     .modal-close { background: var(--input-bg); border: none; width: 30px; height: 30px; border-radius: 999px; font-size: 16px; cursor: pointer; color: var(--text-muted); }
     .modal-close:hover { color: var(--text-heading); }
+    /* Mobile Responsive UI Optimizations */
+    @media (max-width: 768px) {
+      .topbar {
+        padding: 12px 14px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+      .brand {
+        justify-content: space-between;
+        width: 100%;
+      }
+      .top-nav {
+        display: flex;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 4px;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+        gap: 4px;
+      }
+      .top-nav::-webkit-scrollbar { display: none; }
+      .nav-link {
+        padding: 6px 10px;
+        font-size: 12px;
+        flex-shrink: 0;
+      }
+      .company-switcher {
+        width: 100%;
+        justify-content: space-between;
+        margin-top: 2px;
+      }
+      .page {
+        padding: 0 12px;
+        margin: 16px auto 24px;
+      }
+      .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .page-title {
+        font-size: 20px;
+      }
+      .card {
+        padding: 16px 14px;
+        border-radius: 14px;
+      }
+      .table-wrapper {
+        border-radius: 10px;
+        -webkit-overflow-scrolling: touch;
+      }
+      th, td {
+        padding: 10px 10px;
+        font-size: 13px;
+      }
+      .modal-box {
+        padding: 18px 16px;
+        border-radius: 16px;
+      }
+    }
   </style>
   @yield('styles')
 </head>
