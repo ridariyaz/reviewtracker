@@ -293,7 +293,7 @@
         @endisset
         
         <button type="button" class="btn-top-add-company" onclick="openGlobalAddCompanyModal()" title="Create new company">
-          <span>+ Add Company</span>
+          <span>Add Company</span>
         </button>
       </div>
 
@@ -338,6 +338,23 @@
     </div>
   </div>
 
+  <!-- Interactive Spotlight Tour Overlay -->
+  <div id="spotlightTourOverlay" style="display:none; position:fixed; inset:0; z-index:9999; pointer-events:auto;">
+    <div id="spotlightHighlightBox" style="position:absolute; border:3px solid var(--primary); border-radius:12px; box-shadow:0 0 0 9999px rgba(15, 23, 42, 0.75); transition:all 0.3s cubic-bezier(0.16, 1, 0.3, 1); pointer-events:none;"></div>
+    <div id="spotlightTooltipCard" style="position:absolute; background:var(--card-bg); color:var(--text-main); border:1px solid var(--border-color); width:320px; border-radius:16px; padding:20px; box-shadow:0 20px 50px rgba(0,0,0,0.6); transition:all 0.3s ease;">
+      <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--primary); font-weight:700; margin-bottom:4px;" id="spotlightStepCounter">Step 1 of 5</div>
+      <div style="font-size:1rem; font-weight:800; color:var(--text-heading); margin-bottom:6px;" id="spotlightStepTitle">Welcome Tour</div>
+      <div style="font-size:0.88rem; color:var(--text-muted); line-height:1.45; margin-bottom:16px;" id="spotlightStepBody">Description</div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <button type="button" class="btn btn-secondary" style="font-size:12px; padding:6px 12px;" onclick="closeSpotlightTour()">Finish</button>
+        <div style="display:flex; gap:8px;">
+          <button type="button" class="btn btn-secondary" id="spotlightPrevBtn" style="font-size:12px; padding:6px 12px;" onclick="prevSpotlightStep()">Back</button>
+          <button type="button" class="btn" id="spotlightNextBtn" style="font-size:12px; padding:6px 14px;" onclick="nextSpotlightStep()">Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     function openGlobalAddCompanyModal() {
       document.getElementById('globalAddCompanyModal').classList.add('active');
@@ -363,6 +380,94 @@
 
     const storedTheme = localStorage.getItem('app_theme') || 'light';
     applyTheme(storedTheme);
+
+    /* Spotlight Highlight Tour Engine */
+    const tourSteps = [
+      { selector: '.brand', title: '1. Active Company Brand', text: 'Switch between existing companies or add a new company using the right dropdown menu.' },
+      { selector: '.top-nav a[href*="admin"]', title: '2. Admin Dashboard', text: 'Monitor live QR scan performance, positive Google reviews, and employee rankings.' },
+      { selector: '.top-nav a[href*="employees"]', title: '3. Staff Directory', text: 'Add staff members, generate custom QR codes, and download workspace counter standees.' },
+      { selector: '.top-nav a[href*="feedback"]', title: '4. Private Feedback Inbox', text: 'Intercepts 1-star to 3-star customer reviews privately before they reach Google Maps.' },
+      { selector: '.top-nav a[href*="settings"]', title: '5. Custom Branding & Rewards', text: 'Upload your company logo, set Google review links, and enable customer reward contests.' }
+    ];
+
+    let currentTourIndex = 0;
+
+    function startSpotlightTour() {
+      currentTourIndex = 0;
+      document.getElementById('spotlightTourOverlay').style.display = 'block';
+      renderSpotlightStep();
+    }
+
+    function renderSpotlightStep() {
+      const step = tourSteps[currentTourIndex];
+      const targetEl = document.querySelector(step.selector);
+      
+      document.getElementById('spotlightStepCounter').textContent = `Step ${currentTourIndex + 1} of ${tourSteps.length}`;
+      document.getElementById('spotlightStepTitle').textContent = step.title;
+      document.getElementById('spotlightStepBody').textContent = step.text;
+
+      document.getElementById('spotlightPrevBtn').style.display = currentTourIndex === 0 ? 'none' : 'inline-flex';
+      document.getElementById('spotlightNextBtn').textContent = currentTourIndex === tourSteps.length - 1 ? 'Finish' : 'Next →';
+
+      const highlightBox = document.getElementById('spotlightHighlightBox');
+      const tooltipCard = document.getElementById('spotlightTooltipCard');
+
+      if (targetEl) {
+        const rect = targetEl.getBoundingClientRect();
+        highlightBox.style.top = (rect.top - 6) + 'px';
+        highlightBox.style.left = (rect.left - 6) + 'px';
+        highlightBox.style.width = (rect.width + 12) + 'px';
+        highlightBox.style.height = (rect.height + 12) + 'px';
+
+        let topPos = rect.bottom + 14;
+        if (topPos + 220 > window.innerHeight) {
+          topPos = rect.top - 230;
+        }
+        let leftPos = rect.left;
+        if (leftPos + 320 > window.innerWidth) {
+          leftPos = window.innerWidth - 340;
+        }
+
+        tooltipCard.style.top = Math.max(10, topPos) + 'px';
+        tooltipCard.style.left = Math.max(10, leftPos) + 'px';
+      } else {
+        highlightBox.style.top = '20%';
+        highlightBox.style.left = '20%';
+        highlightBox.style.width = '60%';
+        highlightBox.style.height = '180px';
+        tooltipCard.style.top = '40%';
+        tooltipCard.style.left = '30%';
+      }
+    }
+
+    function nextSpotlightStep() {
+      if (currentTourIndex < tourSteps.length - 1) {
+        currentTourIndex++;
+        renderSpotlightStep();
+      } else {
+        closeSpotlightTour();
+      }
+    }
+
+    function prevSpotlightStep() {
+      if (currentTourIndex > 0) {
+        currentTourIndex--;
+        renderSpotlightStep();
+      }
+    }
+
+    function closeSpotlightTour() {
+      document.getElementById('spotlightTourOverlay').style.display = 'none';
+      localStorage.setItem('reviewtracker_tour_done', '1');
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      if (!localStorage.getItem('reviewtracker_tour_done')) {
+        setTimeout(function () {
+          startSpotlightTour();
+        }, 600);
+      }
+    });
   </script>
 
   @yield('scripts')

@@ -113,9 +113,17 @@
 
 @section('content')
   <div class="help-search-hero">
-    <div class="help-search-title">📖 Searchable Feature Guide & Knowledgebase</div>
-    <div class="help-search-sub">
-      Search any option, settings feature, or setup step below to learn how ReviewTracker works for your business.
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; margin-bottom:16px;">
+      <div>
+        <div class="help-search-title">Searchable Feature Guide</div>
+        <div class="help-search-sub" style="margin-bottom:0;">
+          Search any option, settings feature, or setup step below to learn how ReviewTracker works.
+        </div>
+      </div>
+      <button class="btn" style="background:#ffffff; color:#0f172a; font-weight:800;" onclick="startSpotlightTour()">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"><polygon points="10 8 16 12 10 16 10 8"></polygon><circle cx="12" cy="12" r="10"></circle></svg>
+        <span>Take Feature Tour</span>
+      </button>
     </div>
 
     <div class="help-search-box">
