@@ -30,6 +30,7 @@ class SettingsController extends Controller
                 'bn' => ['name' => 'Bengali / Bangladeshi (বাংলা)', 'dir' => 'ltr', 'flag' => '🇧🇩'],
             ],
             'industries' => [
+                'Electronics & Repair',
                 'Retail & E-commerce',
                 'Restaurant & Cafe',
                 'Medical & Dental Clinic',

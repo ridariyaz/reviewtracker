@@ -284,6 +284,18 @@
 
         // Category specific review scenario generators
         const categoryScenarios = {
+            'Electronics & Repair': [
+                'Fixed my device super fast with genuine parts and tested everything before handoff.',
+                'They diagnosed the screen and battery issue right away and gave me an upfront quote.',
+                'Saved all my data and repaired my device in under an hour. Super reliable repair service.',
+                'Great technical support, honest diagnostic, and very fair repair costs.'
+            ],
+            'Electronics & Computers': [
+                'Fixed my device super fast with genuine parts and tested everything before handoff.',
+                'They diagnosed the issue right away and gave me an upfront honest quote.',
+                'Saved all my data and repaired my machine in under an hour. Super reliable service.',
+                'Great technical support, honest diagnostic, and very fair repair costs.'
+            ],
             'Restaurant & Dining': [
                 'The food came out fresh and hot and the table service was super prompt.',
                 'Great atmosphere, delicious meal, and really friendly attentive staff.',
@@ -317,6 +329,11 @@
                 'Very knowledgeable team that saved me time and gave great guidance.'
             ]
         };
+
+        function getRandomElement(arr) {
+            if (!arr || !arr.length) return '';
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
 
         function generateNewReview() {
             // 50% chance to mention employee name, 50% chance general team praise
@@ -372,6 +389,7 @@
                 customKeywordsList.forEach(kw => {
                     detailList.push(`Special thanks for the ${kw}, really appreciated the attention to detail.`);
                     detailList.push(`I was impressed by the ${kw} and how smooth everything went.`);
+                    detailList.push(`The ${kw} service was handled perfectly and everything works great.`);
                 });
             }
 

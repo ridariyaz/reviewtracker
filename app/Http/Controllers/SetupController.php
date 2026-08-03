@@ -25,6 +25,7 @@ class SetupController extends Controller
         $industries = [
             'General Retail',
             'Restaurant & Dining',
+            'Electronics & Repair',
             'Automotive & Repair',
             'Beauty & Salon',
             'Medical & Dental',
