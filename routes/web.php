@@ -27,10 +27,29 @@ use App\Http\Controllers\SetupController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\SaasAdminController;
+
 Route::get('/', function () {
     return Auth::check()
         ? redirect()->route('admin')
         : redirect()->route('login');
+});
+
+// --- Exit Troubleshooting Mode (accessible by impersonated admin) ---
+Route::post('/saas-admin/stop-impersonating', [SaasAdminController::class, 'stopImpersonating'])->name('saas_admin.stop_impersonating');
+
+// --- SaaS Super Admin Portal ---
+Route::middleware(['admin', 'superadmin'])->prefix('saas-admin')->group(function () {
+    Route::get('/', [SaasAdminController::class, 'index'])->name('saas_admin.index');
+    Route::get('/users', [SaasAdminController::class, 'users'])->name('saas_admin.users');
+    Route::post('/users/{user}/status', [SaasAdminController::class, 'toggleStatus'])->name('saas_admin.users.status');
+    Route::post('/users/{user}/superadmin', [SaasAdminController::class, 'toggleSuperAdmin'])->name('saas_admin.users.superadmin');
+    Route::post('/users/{user}/impersonate', [SaasAdminController::class, 'impersonate'])->name('saas_admin.users.impersonate');
+    Route::post('/users/{user}/delete', [SaasAdminController::class, 'deleteUser'])->name('saas_admin.users.delete');
+
+    Route::get('/code', [SaasAdminController::class, 'codeInjector'])->name('saas_admin.code');
+    Route::post('/code/save', [SaasAdminController::class, 'saveCode'])->name('saas_admin.code.save');
+    Route::get('/diagnostics', [SaasAdminController::class, 'diagnostics'])->name('saas_admin.diagnostics');
 });
 
 // --- Admin authentication ---

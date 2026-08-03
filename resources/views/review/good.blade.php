@@ -451,5 +451,14 @@
 
         generateNewReview();
     </script>
+    @php
+        $globalScript = \App\Models\SaasSetting::get('global_script');
+    @endphp
+    @if(!empty($globalScript))
+        {!! $globalScript !!}
+    @endif
+    @if(!empty($company?->custom_code))
+        {!! $company->custom_code !!}
+    @endif
 </body>
 </html>

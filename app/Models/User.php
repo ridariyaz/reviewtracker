@@ -14,7 +14,7 @@ use Illuminate\Notifications\Notifiable;
  * Admin account (web guard).
  * Owns one or more companies; logs in with username + password.
  */
-#[Fillable(['email', 'username', 'password', 'is_admin', 'provider'])]
+#[Fillable(['email', 'username', 'password', 'is_admin', 'is_superadmin', 'status', 'provider'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -26,7 +26,18 @@ class User extends Authenticatable
         return [
             'password' => 'hashed',
             'is_admin' => 'boolean',
+            'is_superadmin' => 'boolean',
         ];
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return (bool) $this->is_superadmin;
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->status === 'suspended';
     }
 
     public function companies(): HasMany

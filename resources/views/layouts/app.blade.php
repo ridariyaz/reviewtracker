@@ -292,6 +292,30 @@
   @yield('styles')
 </head>
 <body>
+  @if(session('impersonator_id'))
+    <div style="background: linear-gradient(90deg, #d97706, #b45309); color:#ffffff; padding:10px 20px; font-weight:700; font-size:13px; display:flex; justify-content:space-between; align-items:center; z-index:9999; box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        <span>⚡ TROUBLESHOOTING MODE: You are currently logged in as client "{{ Auth::user()?->username }}".</span>
+      </div>
+      <form action="{{ route('saas_admin.stop_impersonating') }}" method="POST" style="margin:0;">
+        @csrf
+        <button type="submit" class="btn" style="background:#ffffff; color:#92400e; padding:4px 12px; font-size:12px; border:none; font-weight:800; cursor:pointer;">
+          Exit Troubleshoot Mode &rarr;
+        </button>
+      </form>
+    </div>
+  @endif
+
+  @php
+    $globalAnnouncement = \App\Models\SaasSetting::get('global_announcement');
+  @endphp
+
+  @if(!empty($globalAnnouncement))
+    <div style="background: linear-gradient(90deg, #1e1b4b, #312e81); color:#e0e7ff; padding:10px 20px; text-align:center; font-size:13px; font-weight:600; border-bottom:1px solid #4338ca;">
+      📣 {{ $globalAnnouncement }}
+    </div>
+  @endif
   @hasSection('topbar')
     @yield('topbar')
   @else
@@ -337,6 +361,13 @@
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
         <span>Help</span>
       </a>
+
+      @if(Auth::user()?->isSuperAdmin())
+        <a class="nav-link" href="{{ route('saas_admin.index') }}" style="background:linear-gradient(135deg, #0f172a, #1e293b); color:#38bdf8; border:1px solid rgba(56, 189, 248, 0.4);">
+          <svg viewBox="0 0 24 24" style="stroke:#38bdf8;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          <span>SaaS Control</span>
+        </a>
+      @endif
 
       <!-- Right Side Company Switcher & + Add Company Button -->
       <div class="company-switcher">
@@ -569,5 +600,16 @@
   </script>
 
   @yield('scripts')
+
+  @php
+    $globalScript = \App\Models\SaasSetting::get('global_script');
+  @endphp
+  @if(!empty($globalScript))
+    {!! $globalScript !!}
+  @endif
+
+  @if(!empty($currentCompany?->custom_code))
+    {!! $currentCompany->custom_code !!}
+  @endif
 </body>
 </html>
